@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="C — Da tabela integrada a uma probabilidade de falha" description="Transporte do notebook C_predictive_model.ipynb (TE-292, Aula 3) para o Orange. O Orange nao tem um widget nativo para LightGBM (o widget Gradient Boosting so suporta scikit-learn/XGBoost/CatBoost), entao o treino, a avaliacao e a pontuacao de novos ativos usam Python Script com o mesmo LightGBM e os mesmos hiperparametros do notebook original -- inclusive o mesmo atalho Use_min=0 ao pontuar novos ativos, corrigido apenas na revisao C2.">
+	<nodes>
+		<node id="0" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="Tabela integrada (saida de B.ows)" position="(0, 200)" />
+		<node id="1" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="Ver tabela integrada" position="(250, 50)" />
+		<node id="2" name="Python Script" qualified_name="Orange.widgets.data.owpythonscript.OWPythonScript" project_name="Orange3" version="" title="Treinar e avaliar (LightGBM)" position="(250, 250)" />
+		<node id="3" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="Ver previsoes no teste" position="(500, 150)" />
+		<node id="4" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="Novos ativos (Asset_new_informations.csv)" position="(0, 450)" />
+		<node id="5" name="Python Script" qualified_name="Orange.widgets.data.owpythonscript.OWPythonScript" project_name="Orange3" version="" title="Pontuar novos ativos" position="(500, 400)" />
+		<node id="6" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="Ver ranking de novos ativos" position="(750, 400)" />
+	</nodes>
+	<links>
+		<link id="0" source_node_id="0" sink_node_id="1" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="1" source_node_id="0" sink_node_id="2" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="2" source_node_id="2" sink_node_id="3" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="3" source_node_id="2" sink_node_id="5" source_channel="Object" sink_channel="Object" enabled="true" source_channel_id="object" sink_channel_id="object" />
+		<link id="4" source_node_id="4" sink_node_id="5" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="5" source_node_id="5" sink_node_id="6" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+	</links>
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties node_id="0" format="pickle">gASV7gkAAAAAAAB9lCiMEmNvbnRyb2xBcmVhVmlzaWJsZZSIjAxyZWNlbnRfcGF0aHOUXZQojB5v
+cmFuZ2V3aWRnZXQudXRpbHMuZmlsZWRpYWxvZ3OUjApSZWNlbnRQYXRolJOUKYGUfZQojAdhYnNw
+YXRolIybL1VzZXJzL2pvYW8vRG9jdW1lbnRzL0RvY3VtZW50b3MgLSBNYWNCb29rIFBybyBkZSBK
+b2FvL0lUQS9jb2RlL2l0YV9jZG9tYS9hdWxhXzAzX2RhZG9zX2RlX21hbnV0ZW5jYW8vbWFudXRl
+bmNhby9vdXRwdXQvYXNzZXRfbW9kZWxpemF0aW9uX3RhYmxlX29yYW5nZS5jc3aUjAZwcmVmaXiU
+TowHcmVscGF0aJROjAV0aXRsZZSMAJSMBXNoZWV0lGgOjAtmaWxlX2Zvcm1hdJROdWJoBimBlH2U
+KGgJjJAvVXNlcnMvam9hby9Eb2N1bWVudHMvRG9jdW1lbnRvcyAtIE1hY0Jvb2sgUHJvIGRlIEpv
+YW8vSVRBL2NvZGUvaXRhX2Nkb21hL2F1bGFfMDNfZGFkb3NfZGVfbWFudXRlbmNhby9tYW51dGVu
+Y2FvL2RhZG9zX21hbnV0ZW5jYW8vdXNhZ2VfZGF0YS5jc3aUaAtOaAxOaA1oDmgPaA5oEE51YmgG
+KYGUfZQoaAmMgS9BcHBsaWNhdGlvbnMvT3JhbmdlLmFwcC9Db250ZW50cy9GcmFtZXdvcmtzL1B5
+dGhvbi5mcmFtZXdvcmsvVmVyc2lvbnMvMy4xMi9saWIvcHl0aG9uMy4xMi9zaXRlLXBhY2thZ2Vz
+L09yYW5nZS9kYXRhc2V0cy9pcmlzLnRhYpRoC4wPc2FtcGxlLWRhdGFzZXRzlGgMjAhpcmlzLnRh
+YpRoDWgOaA9oDmgQTnViaAYpgZR9lChoCYyEL0FwcGxpY2F0aW9ucy9PcmFuZ2UuYXBwL0NvbnRl
+bnRzL0ZyYW1ld29ya3MvUHl0aG9uLmZyYW1ld29yay9WZXJzaW9ucy8zLjEyL2xpYi9weXRob24z
+LjEyL3NpdGUtcGFja2FnZXMvT3JhbmdlL2RhdGFzZXRzL3RpdGFuaWMudGFilGgLaBdoDIwLdGl0
+YW5pYy50YWKUaA1oDmgPaA5oEE51YmgGKYGUfZQoaAmMhC9BcHBsaWNhdGlvbnMvT3JhbmdlLmFw
+cC9Db250ZW50cy9GcmFtZXdvcmtzL1B5dGhvbi5mcmFtZXdvcmsvVmVyc2lvbnMvMy4xMi9saWIv
+cHl0aG9uMy4xMi9zaXRlLXBhY2thZ2VzL09yYW5nZS9kYXRhc2V0cy9ob3VzaW5nLnRhYpRoC2gX
+aAyMC2hvdXNpbmcudGFilGgNaA5oD2gOaBBOdWJoBimBlH2UKGgJjIovQXBwbGljYXRpb25zL09y
+YW5nZS5hcHAvQ29udGVudHMvRnJhbWV3b3Jrcy9QeXRob24uZnJhbWV3b3JrL1ZlcnNpb25zLzMu
+MTIvbGliL3B5dGhvbjMuMTIvc2l0ZS1wYWNrYWdlcy9PcmFuZ2UvZGF0YXNldHMvaGVhcnRfZGlz
+ZWFzZS50YWKUaAtoF2gMjBFoZWFydF9kaXNlYXNlLnRhYpRoDWgOaA9oDmgQTnViaAYpgZR9lCho
+CYyLL0FwcGxpY2F0aW9ucy9PcmFuZ2UuYXBwL0NvbnRlbnRzL0ZyYW1ld29ya3MvUHl0aG9uLmZy
+YW1ld29yay9WZXJzaW9ucy8zLjEyL2xpYi9weXRob24zLjEyL3NpdGUtcGFja2FnZXMvT3Jhbmdl
+L2RhdGFzZXRzL2Jyb3duLXNlbGVjdGVkLnRhYpRoC2gXaAyMEmJyb3duLXNlbGVjdGVkLnRhYpRo
+DWgOaA9oDmgQTnViaAYpgZR9lChoCYyAL0FwcGxpY2F0aW9ucy9PcmFuZ2UuYXBwL0NvbnRlbnRz
+L0ZyYW1ld29ya3MvUHl0aG9uLmZyYW1ld29yay9WZXJzaW9ucy8zLjEyL2xpYi9weXRob24zLjEy
+L3NpdGUtcGFja2FnZXMvT3JhbmdlL2RhdGFzZXRzL3pvby50YWKUaAtoF2gMjAd6b28udGFilGgN
+aA5oD2gOaBBOdWJljAtyZWNlbnRfdXJsc5RdlIwTc2F2ZWRXaWRnZXRHZW9tZXRyeZRDQgHZ0MsA
+AwAAAAACEgAAAKEAAARpAAADLQAAAhIAAAC9AAAEaQAAAy0AAAAAAAAAAAaQAAACEgAAAL0AAARp
+AAADLZSMC3NoZWV0X25hbWVzlH2UjAZzb3VyY2WUSwCMA3VybJRoDowNZG9tYWluX2VkaXRvcpR9
+lIwLX192ZXJzaW9uX1+USwGMEGNvbnRleHRfc2V0dGluZ3OUXZSMFW9yYW5nZXdpZGdldC5zZXR0
+aW5nc5SMB0NvbnRleHSUk5QpgZR9lCiMBnZhbHVlc5R9lCiMCXZhcmlhYmxlc5RdlGg1fZRoQV2U
+KF2UKIwRVGltZSAtIE1pbi4gdmFsdWWUjBRPcmFuZ2UuZGF0YS52YXJpYWJsZZSMEkNvbnRpbnVv
+dXNWYXJpYWJsZZSTlEsAaA6IZV2UKIwQVXNlIC0gTWluLiB2YWx1ZZRoSUsAaA6IZV2UKIwFbmJf
+a22UaElLAGgOiGVdlCiMBFIwNDSUaElLAGgOiGVdlCiMBFIwNjSUaElLAGgOiGVdlCiMBFIxMTmU
+aElLAGgOiGVdlCiMBFIxOTOUaElLAGgOiGVdlCiMBFIzNjSUaElLAGgOiGVdlCiMBFIzOTaUaElL
+AGgOiGVdlCiMBFI0MTeUaElLAGgOiGVdlCiMBFI0NDaUaElLAGgOiGVdlCiMBFI1NjWUaElLAGgO
+iGVdlCiMBFI1NzWUaElLAGgOiGVdlCiMBFI2MDaUaElLAGgOiGVdlCiMBFI3MDeUaElLAGgOiGVd
+lCiMBFI3ODKUaEeMEERpc2NyZXRlVmFyaWFibGWUk5RLAIwDMC4wlIhlXZQojARSNzgzlGhJSwBo
+DohlXZQojAtmYWlsdXJlX2JpbpRoaUsAjAQwLCAxlIhlXZQojAVBc3NldJRoR4wOU3RyaW5nVmFy
+aWFibGWUk5RLAmgOiWVlc2g3SwF1jAphdHRyaWJ1dGVzlChoRksChpRoS0sChpRoTUsChpRoT0sC
+hpRoUUsChpRoU0sChpRoVUsChpRoV0sChpRoWUsChpRoW0sChpRoXUsChpRoX0sChpRoYUsChpRo
+Y0sChpRoZUsChpRoZ12UaGphhpRobEsChpRobl2UKIwBMJSMATGUZYaUdJSMBW1ldGFzlGhxSwOG
+lIWUjApjbGFzc192YXJzlCmMEm1vZGlmaWVkX3ZhcmlhYmxlc5RdlHViYXUu
+</properties>
+		<properties node_id="1" format="literal">{'auto_commit': True, 'color_by_class': True, 'controlAreaVisible': True, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x03\x00\x00\x00\x00\x01\xae\x00\x00\x00\xdf\x00\x00\x04\xcd\x00\x00\x02\xee\x00\x00\x01\xae\x00\x00\x00\xfb\x00\x00\x04\xcd\x00\x00\x02\xee\x00\x00\x00\x00\x00\x00\x00\x00\x06\x90\x00\x00\x01\xae\x00\x00\x00\xfb\x00\x00\x04\xcd\x00\x00\x02\xee', 'select_rows': True, 'show_attribute_labels': True, 'show_distributions': False, 'stored_selection': {'rows': [], 'columns': []}, 'stored_sort': [], '__version__': 1}</properties>
+		<properties node_id="2" format="literal">{'controlAreaVisible': True, 'currentScriptIndex': 0, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x03\x00\x00\x00\x00\x015\x00\x00\x00 \x00\x00\x06\r\x00\x00\x03\xfb\x00\x00\x015\x00\x00\x00E\x00\x00\x06\r\x00\x00\x03\xfb\x00\x00\x00\x00\x00\x00\x00\x00\x07\x80\x00\x00\x015\x00\x00\x00E\x00\x00\x06\r\x00\x00\x03\xfb', 'scriptLibrary': [{'name': 'Table from numpy', 'script': 'import numpy as np\nimport pandas as pd\nfrom Orange.data import Table, Domain\nfrom Orange.data.pandas_compat import table_to_frame, table_from_frame\nfrom sklearn.model_selection import train_test_split\n\n# Convert Orange Table to pandas DataFrame\ndf = table_to_frame(in_data, include_metas=True)\n\n# Get the Type column for stratification\ntype_column = df[\'Type\']\n\n# Perform stratified split: 70% train, 30% test\n# random_state=0 to match Jupyter notebook\ntrain_df, test_df = train_test_split(\n    df,\n    test_size=0.3,\n    random_state=0,\n    stratify=type_column\n)\n\n# Convert back to Orange Tables\nout_data = table_from_frame(train_df)  # 70% for training\nout_object = table_from_frame(test_df)  # 30% for testing (holdout)\n\n# Set "Machine failure" as the target variable for both tables\n# Find the "Machine failure" attribute in the domain\nfor table in [out_data, out_object]:\n      if "failures" in table.domain:\n          # Get current domain\n          old_domain = table.domain\n\n          # Find the Machine failure variable\n          machine_failure_var = old_domain["failures"]\n\n          # Create new domain with Machine failure as class variable\n          attributes = [var for var in old_domain.attributes if var.name != "failures"]\n          class_var = machine_failure_var\n          metas = old_domain.metas\n\n          new_domain = Domain(attributes, class_var, metas)\n\n          # Transform the table to use new domain\n          if table is out_data:\n              out_data = table.transform(new_domain)\n          else:\n              out_object = table.transform(new_domain)', 'filename': None}], 'scriptText': 'import sys\nsys.path.insert(0, r"/Users/joao/Documents/Documentos - MacBook Pro de Joao/ITA/code/ita_cdoma/aula_03_dados_de_manutencao/manutencao/.orange_pylibs")\n\nimport numpy as np\nimport pandas as pd\nimport lightgbm as lgb\n\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import (\n    accuracy_score, confusion_matrix, precision_score, recall_score,\n)\nfrom Orange.data.pandas_compat import table_to_frame, table_from_frame\n\ndf = table_to_frame(in_data, include_metas=True)\n\n# Atributos de uso ("Time - Min. value" / "Use - Min. value" sao os nomes\n# que o Group By do B_usage_data.ows da a Time_min/Use_min) e de consumo\n# (mesmo subconjunto de 7 motivos da versao original do notebook C).\nfeatures = [\n    "Time - Min. value",\n    "Use - Min. value",\n    "nb_km",\n    "R193", "R364", "R417", "R446", "R565", "R707", "R783",\n]\ntarget = "failure_bin"\n\nlabeled = df.loc[df[target].notna()].copy()\nX = labeled[features]\ny = labeled[target].astype(int)\n\nprint(f"Ativos com rotulo: {len(labeled):,}")\nprint(f"Ativos sem rotulo: {df[target].isna().sum():,}")\nprint(f"Taxa de falha: {y.mean():.2%}")\nprint(f"Valores ausentes nos atributos: {X.isna().sum().sum():,}")\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.30, random_state=42, stratify=y,\n)\n\nclassifier = lgb.LGBMClassifier(\n    learning_rate=0.05,\n    n_estimators=200,\n    num_leaves=31,\n    max_bin=125,\n    importance_type="gain",\n    random_state=42,\n    verbose=-1,\n)\nclassifier.fit(X_train, y_train)\n\ny_probability = classifier.predict_proba(X_test)[:, 1]\ny_pred = (y_probability &gt;= 0.50).astype(int)\n\ntn, fp, fn, tp = confusion_matrix(y_test, y_pred, labels=[0, 1]).ravel()\n\nprint(f"\\nTreino: {len(X_train):,} ativos; falhas = {y_train.mean():.2%}")\nprint(f"Teste:  {len(X_test):,} ativos; falhas = {y_test.mean():.2%}")\nprint(f"\\nAcuracia: {accuracy_score(y_test, y_pred):.1%}")\nprint(f"Precisao: {precision_score(y_test, y_pred, zero_division=0):.1%}")\nprint(f"Recall:   {recall_score(y_test, y_pred):.1%}")\nprint(f"TN={tn} | FP={fp} | FN={fn} | TP={tp}")\n\nimportance = (\n    pd.Series(classifier.feature_importances_, index=features)\n    .sort_values(ascending=False)\n)\nprint("\\nImportancia dos atributos (ganho acumulado):")\nprint(importance.to_string())\n\ntest_out = X_test.copy()\ntest_out["Asset"] = labeled.loc[X_test.index, "Asset"]\ntest_out["failure_bin_real"] = y_test.values\ntest_out["probabilidade_falha"] = y_probability\ntest_out["previsto_0_50"] = y_pred\ntest_out = test_out.reset_index(drop=True)\n\nout_data = table_from_frame(test_out)\nout_object = classifier\n', 'splitterState': b'\x00\x00\x00\xff\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x02K\x00\x00\x01D\x01\xff\xff\xff\xff\x01\x00\x00\x00\x02\x00', 'vimModeEnabled': False, '__version__': 2}</properties>
+		<properties node_id="3" format="literal">{'auto_commit': True, 'color_by_class': True, 'controlAreaVisible': True, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x03\x00\x00\x00\x00\x01\xae\x00\x00\x00\xdf\x00\x00\x04\xcd\x00\x00\x02\xee\x00\x00\x01\xae\x00\x00\x00\xfb\x00\x00\x04\xcd\x00\x00\x02\xee\x00\x00\x00\x00\x00\x00\x00\x00\x06\x90\x00\x00\x01\xae\x00\x00\x00\xfb\x00\x00\x04\xcd\x00\x00\x02\xee', 'select_rows': True, 'show_attribute_labels': True, 'show_distributions': False, 'stored_selection': {'rows': [], 'columns': []}, 'stored_sort': [], '__version__': 1}</properties>
+		<properties node_id="4" format="pickle">gASVggoAAAAAAAB9lCiMEmNvbnRyb2xBcmVhVmlzaWJsZZSIjAxyZWNlbnRfcGF0aHOUXZQojB5v
+cmFuZ2V3aWRnZXQudXRpbHMuZmlsZWRpYWxvZ3OUjApSZWNlbnRQYXRolJOUKYGUfZQojAdhYnNw
+YXRolIycL1VzZXJzL2pvYW8vRG9jdW1lbnRzL0RvY3VtZW50b3MgLSBNYWNCb29rIFBybyBkZSBK
+b2FvL0lUQS9jb2RlL2l0YV9jZG9tYS9hdWxhXzAzX2RhZG9zX2RlX21hbnV0ZW5jYW8vbWFudXRl
+bmNhby9kYWRvc19tYW51dGVuY2FvL0Fzc2V0X25ld19pbmZvcm1hdGlvbnMuY3N2lIwGcHJlZml4
+lE6MB3JlbHBhdGiUTowFdGl0bGWUjACUjAVzaGVldJRoDowLZmlsZV9mb3JtYXSUTnViaAYpgZR9
+lChoCYyQL1VzZXJzL2pvYW8vRG9jdW1lbnRzL0RvY3VtZW50b3MgLSBNYWNCb29rIFBybyBkZSBK
+b2FvL0lUQS9jb2RlL2l0YV9jZG9tYS9hdWxhXzAzX2RhZG9zX2RlX21hbnV0ZW5jYW8vbWFudXRl
+bmNhby9kYWRvc19tYW51dGVuY2FvL3VzYWdlX2RhdGEuY3N2lGgLTmgMTmgNaA5oD2gOaBBOdWJo
+BimBlH2UKGgJjIEvQXBwbGljYXRpb25zL09yYW5nZS5hcHAvQ29udGVudHMvRnJhbWV3b3Jrcy9Q
+eXRob24uZnJhbWV3b3JrL1ZlcnNpb25zLzMuMTIvbGliL3B5dGhvbjMuMTIvc2l0ZS1wYWNrYWdl
+cy9PcmFuZ2UvZGF0YXNldHMvaXJpcy50YWKUaAuMD3NhbXBsZS1kYXRhc2V0c5RoDIwIaXJpcy50
+YWKUaA1oDmgPaA5oEE51YmgGKYGUfZQoaAmMhC9BcHBsaWNhdGlvbnMvT3JhbmdlLmFwcC9Db250
+ZW50cy9GcmFtZXdvcmtzL1B5dGhvbi5mcmFtZXdvcmsvVmVyc2lvbnMvMy4xMi9saWIvcHl0aG9u
+My4xMi9zaXRlLXBhY2thZ2VzL09yYW5nZS9kYXRhc2V0cy90aXRhbmljLnRhYpRoC2gXaAyMC3Rp
+dGFuaWMudGFilGgNaA5oD2gOaBBOdWJoBimBlH2UKGgJjIQvQXBwbGljYXRpb25zL09yYW5nZS5h
+cHAvQ29udGVudHMvRnJhbWV3b3Jrcy9QeXRob24uZnJhbWV3b3JrL1ZlcnNpb25zLzMuMTIvbGli
+L3B5dGhvbjMuMTIvc2l0ZS1wYWNrYWdlcy9PcmFuZ2UvZGF0YXNldHMvaG91c2luZy50YWKUaAto
+F2gMjAtob3VzaW5nLnRhYpRoDWgOaA9oDmgQTnViaAYpgZR9lChoCYyKL0FwcGxpY2F0aW9ucy9P
+cmFuZ2UuYXBwL0NvbnRlbnRzL0ZyYW1ld29ya3MvUHl0aG9uLmZyYW1ld29yay9WZXJzaW9ucy8z
+LjEyL2xpYi9weXRob24zLjEyL3NpdGUtcGFja2FnZXMvT3JhbmdlL2RhdGFzZXRzL2hlYXJ0X2Rp
+c2Vhc2UudGFilGgLaBdoDIwRaGVhcnRfZGlzZWFzZS50YWKUaA1oDmgPaA5oEE51YmgGKYGUfZQo
+aAmMiy9BcHBsaWNhdGlvbnMvT3JhbmdlLmFwcC9Db250ZW50cy9GcmFtZXdvcmtzL1B5dGhvbi5m
+cmFtZXdvcmsvVmVyc2lvbnMvMy4xMi9saWIvcHl0aG9uMy4xMi9zaXRlLXBhY2thZ2VzL09yYW5n
+ZS9kYXRhc2V0cy9icm93bi1zZWxlY3RlZC50YWKUaAtoF2gMjBJicm93bi1zZWxlY3RlZC50YWKU
+aA1oDmgPaA5oEE51YmgGKYGUfZQoaAmMgC9BcHBsaWNhdGlvbnMvT3JhbmdlLmFwcC9Db250ZW50
+cy9GcmFtZXdvcmtzL1B5dGhvbi5mcmFtZXdvcmsvVmVyc2lvbnMvMy4xMi9saWIvcHl0aG9uMy4x
+Mi9zaXRlLXBhY2thZ2VzL09yYW5nZS9kYXRhc2V0cy96b28udGFilGgLaBdoDIwHem9vLnRhYpRo
+DWgOaA9oDmgQTnViZYwLcmVjZW50X3VybHOUXZSME3NhdmVkV2lkZ2V0R2VvbWV0cnmUQ0IB2dDL
+AAMAAAAAAhIAAAChAAAEaQAAAy0AAAISAAAAvQAABGkAAAMtAAAAAAAAAAAGkAAAAhIAAAC9AAAE
+aQAAAy2UjAtzaGVldF9uYW1lc5R9lIwGc291cmNllEsAjAN1cmyUaA6MDWRvbWFpbl9lZGl0b3KU
+fZSMC19fdmVyc2lvbl9flEsBjBBjb250ZXh0X3NldHRpbmdzlF2UjBVvcmFuZ2V3aWRnZXQuc2V0
+dGluZ3OUjAdDb250ZXh0lJOUKYGUfZQojAZ2YWx1ZXOUfZQojAl2YXJpYWJsZXOUXZRoNX2UaEFd
+lChdlCiMEVI0MTdfUXVhbnRpdHlfc3VtlIwUT3JhbmdlLmRhdGEudmFyaWFibGWUjBJDb250aW51
+b3VzVmFyaWFibGWUk5RLAGgOiGVdlCiMEVI3MDdfUXVhbnRpdHlfc3VtlGhJSwBoDohlXZQojBFS
+MTkzX1F1YW50aXR5X3N1bZRoSUsAaA6IZV2UKIwRUjU2NV9RdWFudGl0eV9zdW2UaElLAGgOiGVd
+lCiMEVI3ODNfUXVhbnRpdHlfc3VtlGhJSwBoDohlXZQojBFSMzY0X1F1YW50aXR5X3N1bZRoSUsA
+aA6IZV2UKIwRUjQ0Nl9RdWFudGl0eV9zdW2UaElLAGgOiGVdlCiMEVIxMTlfUXVhbnRpdHlfc3Vt
+lGhJSwBoDohlXZQojBFSMDQ0X1F1YW50aXR5X3N1bZRoR4wQRGlzY3JldGVWYXJpYWJsZZSTlEsA
+jAQwLCAxlIhlXZQojBFSNTc1X1F1YW50aXR5X3N1bZRoSUsAaA6IZV2UKIwRUjYwNl9RdWFudGl0
+eV9zdW2UaElLAGgOiGVdlCiMEVIwNjRfUXVhbnRpdHlfc3VtlGhJSwBoDohlXZQojBFSMzk2X1F1
+YW50aXR5X3N1bZRoSUsAaA6IZV2UKIwRUjc4Ml9RdWFudGl0eV9zdW2UaFtLAIwBMJSIZV2UKIwX
+VGltZV9iZWdpbl9leHBsb2l0YXRpb26UaElLAGgOiGVdlCiMCkluaXRpYWxfa22UaElLAGgOiGVd
+lCiMBW5iX2ttlGhJSwBoDohlXZQojAVBc3NldJRoR4wOU3RyaW5nVmFyaWFibGWUk5RLAmgOiWVl
+c2g3SwF1jAphdHRyaWJ1dGVzlChoRksChpRoS0sChpRoTUsChpRoT0sChpRoUUsChpRoU0sChpRo
+VUsChpRoV0sChpRoWV2UKGhnjAExlGWGlGheSwKGlGhgSwKGlGhiSwKGlGhkSwKGlGhmXZRoZ2GG
+lGhpSwKGlGhrSwKGlGhtSwKGlHSUjAVtZXRhc5Rob0sDhpSFlIwKY2xhc3NfdmFyc5QpjBJtb2Rp
+ZmllZF92YXJpYWJsZXOUXZR1YmF1Lg==
+</properties>
+		<properties node_id="5" format="literal">{'controlAreaVisible': True, 'currentScriptIndex': 0, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x03\x00\x00\x00\x00\x015\x00\x00\x00\x1f\x00\x00\x06\r\x00\x00\x03\xe2\x00\x00\x015\x00\x00\x00;\x00\x00\x06\r\x00\x00\x03\xe2\x00\x00\x00\x00\x00\x00\x00\x00\x06\x90\x00\x00\x015\x00\x00\x00;\x00\x00\x06\r\x00\x00\x03\xe2', 'scriptLibrary': [{'name': 'Table from numpy', 'script': 'import numpy as np\nimport pandas as pd\nfrom Orange.data import Table, Domain\nfrom Orange.data.pandas_compat import table_to_frame, table_from_frame\nfrom sklearn.model_selection import train_test_split\n\n# Convert Orange Table to pandas DataFrame\ndf = table_to_frame(in_data, include_metas=True)\n\n# Get the Type column for stratification\ntype_column = df[\'Type\']\n\n# Perform stratified split: 70% train, 30% test\n# random_state=0 to match Jupyter notebook\ntrain_df, test_df = train_test_split(\n    df,\n    test_size=0.3,\n    random_state=0,\n    stratify=type_column\n)\n\n# Convert back to Orange Tables\nout_data = table_from_frame(train_df)  # 70% for training\nout_object = table_from_frame(test_df)  # 30% for testing (holdout)\n\n# Set "Machine failure" as the target variable for both tables\n# Find the "Machine failure" attribute in the domain\nfor table in [out_data, out_object]:\n      if "failures" in table.domain:\n          # Get current domain\n          old_domain = table.domain\n\n          # Find the Machine failure variable\n          machine_failure_var = old_domain["failures"]\n\n          # Create new domain with Machine failure as class variable\n          attributes = [var for var in old_domain.attributes if var.name != "failures"]\n          class_var = machine_failure_var\n          metas = old_domain.metas\n\n          new_domain = Domain(attributes, class_var, metas)\n\n          # Transform the table to use new domain\n          if table is out_data:\n              out_data = table.transform(new_domain)\n          else:\n              out_object = table.transform(new_domain)', 'filename': None}], 'scriptText': 'import pandas as pd\nfrom Orange.data.pandas_compat import table_to_frame, table_from_frame\n\nnew_assets = table_to_frame(in_data, include_metas=True)\nclassifier = in_object\n\nrename_map = {\n    column: column.replace("_Quantity_sum", "")\n    for column in new_assets.columns\n    if column.endswith("_Quantity_sum")\n}\nrename_map.update({"Time_begin_exploitation": "Time - Min. value"})\n\nnew_assets_model = new_assets.rename(columns=rename_map).copy()\nnew_assets_model["Use - Min. value"] = 0.0\n\nfeatures = [\n    "Time - Min. value",\n    "Use - Min. value",\n    "nb_km",\n    "R193", "R364", "R417", "R446", "R565", "R707", "R783",\n]\nmissing_features = [f for f in features if f not in new_assets_model.columns]\nif missing_features:\n    raise ValueError(f"Atributos ausentes nos novos ativos: {missing_features}")\n\nnew_probability = classifier.predict_proba(new_assets_model[features])[:, 1]\n\nranking = (\n    pd.DataFrame({\n        "Asset": new_assets_model["Asset"],\n        "probabilidade_falha": new_probability,\n        "classe_limiar_0_50": (new_probability &gt;= 0.50).astype(int),\n    })\n    .sort_values("probabilidade_falha", ascending=False)\n    .reset_index(drop=True)\n)\n\nprint(f"Novos ativos avaliados: {len(ranking)}")\nprint(f"Acima do limiar 0,50: {ranking[\'classe_limiar_0_50\'].sum()}")\nprint(ranking.head(10).to_string())\n\nout_data = table_from_frame(ranking)\n', 'splitterState': b'\x00\x00\x00\xff\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x02K\x00\x00\x01D\x01\xff\xff\xff\xff\x01\x00\x00\x00\x02\x00', 'vimModeEnabled': False, '__version__': 2}</properties>
+		<properties node_id="6" format="literal">{'auto_commit': True, 'color_by_class': True, 'controlAreaVisible': True, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x03\x00\x00\x00\x00\x01\xae\x00\x00\x00\xdf\x00\x00\x04\xcd\x00\x00\x02\xee\x00\x00\x01\xae\x00\x00\x00\xfb\x00\x00\x04\xcd\x00\x00\x02\xee\x00\x00\x00\x00\x00\x00\x00\x00\x06\x90\x00\x00\x01\xae\x00\x00\x00\xfb\x00\x00\x04\xcd\x00\x00\x02\xee', 'select_rows': True, 'show_attribute_labels': True, 'show_distributions': False, 'stored_selection': {'rows': [], 'columns': []}, 'stored_sort': [], '__version__': 1}</properties>
+	</node_properties>
+	<session_state>
+		<window_groups />
+	</session_state>
+</scheme>

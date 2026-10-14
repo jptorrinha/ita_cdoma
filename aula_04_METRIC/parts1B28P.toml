@@ -1,0 +1,206 @@
+[[base]]
+id     = 1
+name    = "Company"
+dtrans  = 0.0
+assets  = 1  # 1 system
+duty_cycle = 1.0
+grounded = 19707.0 # grounded or unavailability cost per day
+
+# r and brt are left at 0 (no local repair capability) for this dataset,
+# since it wasn't authored with a base-repair split in mind — see README.md.
+
+[[part]]
+name   = "Part_01"
+cost   = 94328.75  # USD
+lambda_ = 0.0000436 # failures per hour
+qpa    = 1      # the demand rate is proportional to the quantity per assembly
+drt    = 75.0 # depot repair time (mean)
+
+[[part]]
+name   = "Part_02"
+cost   = 15400.00
+lambda_ = 0.00001
+qpa    = 1
+drt    = 75.0
+
+[[part]]
+name   = "Part_03"
+cost   = 11900000.00
+lambda_ = 0.00017
+qpa    = 1
+drt    = 75.0
+
+[[part]]
+name   = "Part_04"
+cost   = 3500.00
+lambda_ = 0.0000012
+qpa    = 1
+drt    = 75.0
+
+[[part]]
+name   = "Part_05"
+cost   = 20652.32
+lambda_ = 0.00001
+qpa    = 1
+drt    = 15.0
+
+[[part]]
+name   = "Part_06"
+cost   = 233750.00
+lambda_ = 0.0000833
+qpa    = 1
+drt    = 75.0
+
+[[part]]
+name   = "Part_07"
+cost   = 2409.55
+lambda_ = 0.00000118
+qpa    = 1
+drt    = 30.0
+
+[[part]]
+name   = "Part_08"
+cost   = 100.00
+lambda_ = 0.00001
+qpa    = 1
+drt    = 30.0
+
+[[part]]
+name   = "Part_09"
+cost   = 200.00
+lambda_ = 0.00001
+qpa    = 1
+drt    = 30.0
+
+[[part]]
+name   = "Part_10"
+cost   = 78000.00
+lambda_ = 0.000001038
+qpa    = 1
+drt    = 75.0
+
+[[part]]
+name   = "Part_11"
+cost   = 33858.00
+lambda_ = 0.0000114
+qpa    = 1
+drt    = 75.0
+
+[[part]]
+name   = "Part_12"
+cost   = 51.10
+lambda_ = 0.0000114
+qpa    = 1
+drt    = 75.0
+
+[[part]]
+name   = "Part_13"
+cost   = 9636.00
+lambda_ = 0.0000114
+qpa    = 1
+drt    = 75.0
+
+[[part]]
+name   = "Part_14"
+cost   = 33145.00
+lambda_ = 0.0000114
+qpa    = 1
+drt    = 75.0
+
+[[part]]
+name   = "Part_15"
+cost   = 2179.99
+lambda_ = 0.00002
+qpa    = 1
+drt    = 15.0
+
+[[part]]
+name   = "Part_16"
+cost   = 661.24
+lambda_ = 0.00002
+qpa    = 4
+drt    = 15.0
+
+[[part]]
+name   = "Part_17"
+cost   = 940.95
+lambda_ = 0.0000333
+qpa    = 2
+drt    = 15.0
+
+[[part]]
+name   = "Part_18"
+cost   = 5513.39
+lambda_ = 0.0000010
+qpa    = 1
+drt    = 20.0
+
+[[part]]
+name   = "Part_19"
+cost   = 16062.34
+lambda_ = 0.0000010
+qpa    = 1
+drt    = 20.0
+
+[[part]]
+name   = "Part_20"
+cost   = 18377.96
+lambda_ = 0.0000100
+qpa    = 2
+drt    = 20.0
+
+[[part]]
+name   = "Part_21"
+cost   = 11176.01
+lambda_ = 0.0000010
+qpa    = 1
+drt    = 20.0
+
+[[part]]
+name   = "Part_22"
+cost   = 999.04
+lambda_ = 0.00002
+qpa    = 1
+drt    = 20.0
+
+[[part]]
+name   = "Part_23"
+cost   = 156992.00
+lambda_ = 0.000002
+qpa    = 1
+drt    = 20.0
+
+[[part]]
+name   = "Part_24"
+cost   = 14272.00
+lambda_ = 0.000002
+qpa    = 1
+drt    = 10.0
+
+[[part]]
+name   = "Part_25"
+cost   = 57088.00
+lambda_ = 0.000001
+qpa    = 1
+drt    = 10.0
+
+[[part]]
+name   = "Part_26"
+cost   = 49452.68
+lambda_ = 0.00002
+qpa    = 1
+drt    = 20.0
+
+[[part]]
+name   = "Part_27"
+cost   = 35680.00
+lambda_ = 0.000001
+qpa    = 1
+drt    = 10.0
+
+[[part]]
+name   = "Part_28"
+cost   = 1484288.00
+lambda_ = 0.000033
+qpa    = 1
+drt    = 20.0

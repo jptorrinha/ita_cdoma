@@ -1,0 +1,100 @@
+{
+  "id": "mta_tire_replacement_alvo366_exec2",
+  "horario": "2026-10-14T09:16:06-03:00",
+  "parametros": {
+    "scenario": "tire_replacement",
+    "target_time": 366,
+    "num_simulations": 5000
+  },
+  "resposta": {
+    "num_simulations": 5000,
+    "num_subtasks": 9,
+    "risk_color": "warning",
+    "risk_level": "MODERATE",
+    "scenario_name": "Aircraft Tire Replacement",
+    "stats": {
+      "deterministic_mttr": 235,
+      "mean": 298.68662563242543,
+      "median": 291.7892320686366,
+      "std": 51.23896818881893,
+      "min": 205.79166951950776,
+      "max": 558.9057484500079,
+      "p50": 291.7892320686366,
+      "p75": 329.7323150974896,
+      "p90": 367.4907793110119,
+      "p95": 393.220475210849,
+      "p99": 447.6193300371669,
+      "prob_on_time": 0.8946,
+      "prob_within_10pct": 0.961,
+      "prob_within_20pct": 0.9878,
+      "time_at_risk": 0,
+      "coefficient_of_variation": 17.15475812829847
+    },
+    "subtask_table": [
+      {
+        "Subtask": "Install Wheel and Remove Jacks",
+        "MTTR": 35,
+        "Variance": 12.154163566289844,
+        "Std Dev": 3.4862821983152545,
+        "% of Total Variance": 18.879276827476787
+      },
+      {
+        "Subtask": "Jack Aircraft and Remove Wheel",
+        "MTTR": 35,
+        "Variance": 12.115467874760107,
+        "Std Dev": 3.480728066764209,
+        "% of Total Variance": 18.819170126720618
+      },
+      {
+        "Subtask": "Inspect Wheel Assembly",
+        "MTTR": 30,
+        "Variance": 8.887918329691482,
+        "Std Dev": 2.981261197830791,
+        "% of Total Variance": 13.805760441767045
+      },
+      {
+        "Subtask": "Mount New Tire on Wheel",
+        "MTTR": 30,
+        "Variance": 8.715396892099237,
+        "Std Dev": 2.9521851046469356,
+        "% of Total Variance": 13.537779847198456
+      },
+      {
+        "Subtask": "Break Tire Bead and Remove Tire",
+        "MTTR": 25,
+        "Variance": 6.177941039036134,
+        "Std Dev": 2.485546426650714,
+        "% of Total Variance": 9.596304876403481
+      },
+      {
+        "Subtask": "Balance Wheel and Tire Assembly",
+        "MTTR": 25,
+        "Variance": 6.161084032032592,
+        "Std Dev": 2.4821531040676343,
+        "% of Total Variance": 9.570120589844656
+      },
+      {
+        "Subtask": "Safety and Preparation",
+        "MTTR": 20,
+        "Variance": 3.9403106345710586,
+        "Std Dev": 1.985021570303723,
+        "% of Total Variance": 6.120554067796371
+      },
+      {
+        "Subtask": "Final Inspection and Documentation",
+        "MTTR": 20,
+        "Variance": 3.9291061148638526,
+        "Std Dev": 1.9821972946363973,
+        "% of Total Variance": 6.103149889539468
+      },
+      {
+        "Subtask": "Obtain and Verify New Tire",
+        "MTTR": 15,
+        "Variance": 2.29694378731102,
+        "Std Dev": 1.5155671503800219,
+        "% of Total Variance": 3.56788333325311
+      }
+    ],
+    "success": true
+  }
+}

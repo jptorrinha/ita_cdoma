@@ -1,0 +1,7 @@
+label,air_temp_k,process_temp_k,speed_rpm,torque_nm,tool_wear_min,mec_power_w
+normal,298.5,308.8,1500,40.0,50,6283.2
+desgaste_alto,299.0,309.5,1450,45.0,230,6833.0
+potencia_baixa,298.0,308.0,1200,15.0,20,1885.0
+potencia_alta,298.2,308.5,2000,50.0,10,10472.0
+dissipacao_calor,305.0,310.0,1300,35.0,80,4764.7
+sobrecarga,299.5,309.0,1500,55.0,200,8639.4

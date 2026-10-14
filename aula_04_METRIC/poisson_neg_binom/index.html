@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Laboratório visual para comparar distribuições de Poisson e binomial negativa no contexto METRIC e VARI-METRIC.">
+  <title>Poisson × Binomial negativa — laboratório visual</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Laboratório visual · METRIC / VARI-METRIC</p>
+        <h1>Mesma média. Riscos diferentes.</h1>
+        <p class="hero-copy">
+          Mantenha a média do pipeline fixa e altere apenas a dispersão. Observe onde a
+          probabilidade se desloca e o que isso muda no fill rate e nos backorders esperados.
+        </p>
+      </div>
+      <button id="theme-toggle" class="icon-button" type="button" aria-label="Alternar tema claro e escuro" title="Alternar tema">◐</button>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Perspectivas da comparação">
+      <button id="tab-shape" class="tab active" type="button" role="tab" aria-selected="true" aria-controls="panel-shape" data-panel="panel-shape">
+        1. Forma e cauda
+      </button>
+      <button id="tab-stock" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-stock" data-panel="panel-stock" tabindex="-1">
+        2. Consequência no estoque
+      </button>
+      <button id="tab-mechanism" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-mechanism" data-panel="panel-mechanism" tabindex="-1">
+        3. De onde vem a dispersão
+      </button>
+    </nav>
+
+    <p id="chart-instructions" class="sr-only">Nos gráficos, use as setas esquerda e direita para percorrer os valores; Home e End levam ao primeiro e ao último ponto. Toque ou mova o ponteiro para consultar um ponto.</p>
+    <div id="chart-live" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <main id="conteudo">
+      <section id="panel-shape" class="tab-panel" role="tabpanel" aria-labelledby="tab-shape">
+        <div class="formula-grid">
+          <article class="formula-card poisson-card">
+            <div class="model-title"><span class="series-dot poisson-dot"></span><h2>Poisson</h2></div>
+            <p class="formula"><span>E[X] = μ</span><span>Var(X) = μ</span><span>VMR = 1</span></p>
+            <p>A média determina também a variância.</p>
+          </article>
+          <div class="same-mean" aria-label="Média comum aos dois modelos">
+            <span>média comum</span>
+            <strong id="shared-mean">μ = 8,0</strong>
+          </div>
+          <article class="formula-card nb-card">
+            <div class="model-title"><span class="series-dot nb-dot"></span><h2>Binomial negativa</h2></div>
+            <p class="formula"><span>E[X] = μ</span><span>Var(X) = μφ</span><span>VMR = φ ≥ 1</span></p>
+            <p id="nb-parameters">ν = 8,00 · p = 0,500</p>
+          </article>
+        </div>
+
+        <div id="shape-insight" class="insight" role="status" aria-live="polite"></div>
+
+        <div class="chart-panel chart-panel-large">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">PMF discreta</p>
+              <h2>Onde está a massa de probabilidade?</h2>
+              <p>As hastes mostram <strong>P(X = k)</strong>. A zona sombreada começa em <var>X ≥ s</var>: não há unidade em mãos para atender imediatamente uma nova demanda.</p>
+            </div>
+            <div class="legend" aria-label="Legenda">
+              <span><i class="legend-line poisson-line"></i>Poisson</span>
+              <span><i class="legend-line nb-line"></i>Binomial negativa</span>
+              <span><i class="legend-rule"></i>Estoque <var>s</var></span>
+            </div>
+          </div>
+          <canvas id="pmf-chart" height="340" role="img" tabindex="0" aria-describedby="chart-instructions chart-live" aria-label="Funções de massa de probabilidade de Poisson e binomial negativa"></canvas>
+          <p class="tail-note" id="pmf-tail-note"></p>
+        </div>
+
+        <div class="control-slot" data-slot="shape">
+          <section class="control-panel" aria-labelledby="control-title">
+            <div class="control-heading">
+              <div>
+                <p class="section-kicker">Experimento controlado</p>
+                <h2 id="control-title">Altere uma hipótese de cada vez</h2>
+              </div>
+              <button id="reset-controls" class="quiet-button" type="button">Restaurar exemplo</button>
+            </div>
+
+            <div class="controls-grid">
+              <div class="control-group">
+                <div class="control-label-row">
+                  <label for="mean-control">Média do pipeline, <var>μ</var></label>
+                  <output id="mean-output" for="mean-control">8,0</output>
+                </div>
+                <input id="mean-control" type="range" min="0.5" max="30" step="0.5" value="8">
+                <p>Igual nos dois modelos.</p>
+              </div>
+
+              <div class="control-group control-group-wide">
+                <div class="control-label-row">
+                  <label for="vmr-control">VMR da binomial negativa, <var>φ</var></label>
+                  <output id="vmr-output" for="vmr-control">2,0</output>
+                </div>
+                <input id="vmr-control" type="range" min="1" max="5" step="0.1" value="2">
+                <p>VMR = variância / média. Na Poisson, VMR = 1.</p>
+                <div class="preset-row" aria-label="Cenários de dispersão">
+                  <button type="button" class="preset" data-vmr="1">Limite Poisson</button>
+                  <button type="button" class="preset" data-vmr="1.5">Moderada</button>
+                  <button type="button" class="preset" data-vmr="3">Forte</button>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <div class="control-label-row">
+                  <label for="stock-control">Estoque autorizado, <var>s</var></label>
+                  <output id="stock-output" for="stock-control">12</output>
+                </div>
+                <input id="stock-control" type="range" min="0" max="80" step="1" value="12">
+                <p>Posição marcada em todos os gráficos.</p>
+              </div>
+
+              <div class="control-group">
+                <div class="control-label-row">
+                  <label for="target-control">Meta de fill rate</label>
+                  <output id="target-output" for="target-control">90%</output>
+                </div>
+                <input id="target-control" type="range" min="0.5" max="0.99" step="0.01" value="0.9">
+                <p>Usada para comparar o estoque requerido.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="two-column">
+          <div class="chart-panel">
+            <div class="panel-heading compact">
+              <div>
+                <p class="section-kicker">Redistribuição</p>
+                <h2>BN − Poisson em cada valor de <var>k</var></h2>
+                <p>Cada barra é a diferença de probabilidade no mesmo <var>k</var>: <strong>P<sub>BN</sub>(X = k) − P<sub>Poisson</sub>(X = k)</strong>. Acima do eixo, a BN atribui mais probabilidade àquele valor; abaixo, atribui menos. A probabilidade não desaparece: o que sai da região central reaparece em <var>k</var> = 0 e na cauda direita.</p>
+              </div>
+            </div>
+            <canvas id="difference-chart" height="255" role="img" tabindex="0" aria-describedby="chart-instructions chart-live" aria-label="Diferença entre as probabilidades binomial negativa e Poisson"></canvas>
+          </div>
+
+          <div class="chart-panel">
+            <div class="panel-heading compact">
+              <div>
+                <p class="section-kicker">Cauda direita</p>
+                <h2>Probabilidade de atingir ou exceder <var>k</var></h2>
+                <p><strong>P(X ≥ k)</strong> em escala logarítmica para revelar eventos raros.</p>
+              </div>
+            </div>
+            <canvas id="tail-chart" height="255" role="img" tabindex="0" aria-describedby="chart-instructions chart-live" aria-label="Probabilidade de cauda direita para Poisson e binomial negativa"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-stock" class="tab-panel" role="tabpanel" aria-labelledby="tab-stock" hidden>
+        <div class="definition-strip">
+          <article><span>Atendimento imediato</span><strong>FR(s) = P(X &lt; s)</strong><small>Há pelo menos uma unidade em mãos.</small></article>
+          <article><span>Próxima demanda em espera</span><strong>P(X ≥ s)</strong><small>Inclui o estado X = s.</small></article>
+          <article><span>Backorder existente</span><strong>P(X &gt; s)</strong><small>Já falta ao menos uma unidade.</small></article>
+          <article><span>Backorders esperados</span><strong>EBO(s) = E[(X − s)<sup>+</sup>]</strong><small>Mede também a magnitude da falta.</small></article>
+        </div>
+
+        <div class="stock-summary-grid">
+          <article class="comparison-card">
+            <div class="comparison-heading">
+              <div>
+                <p class="section-kicker">No estoque selecionado</p>
+                <h2 id="comparison-stock-title">Resultados com s = 12</h2>
+              </div>
+              <span class="off-by-one">X = s separa duas perguntas distintas</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Modelo</th>
+                    <th scope="col">Média</th>
+                    <th scope="col">Variância</th>
+                    <th scope="col">P(X = 0)</th>
+                    <th scope="col">FR(s)</th>
+                    <th scope="col">P(X ≥ s)</th>
+                    <th scope="col">P(X &gt; s)</th>
+                    <th scope="col">EBO(s)</th>
+                    <th scope="col">Q<sub>95</sub></th>
+                  </tr>
+                </thead>
+                <tbody id="comparison-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="target-card">
+            <p class="section-kicker">Dimensionamento</p>
+            <h2 id="target-card-title">Estoque para FR ≥ 90%</h2>
+            <div class="target-model poisson-target">
+              <span><i class="series-dot poisson-dot"></i>Poisson</span>
+              <strong id="poisson-required-stock">13</strong>
+              <small>unidades</small>
+            </div>
+            <div class="target-model nb-target">
+              <span><i class="series-dot nb-dot"></i>Binomial negativa</span>
+              <strong id="nb-required-stock">14</strong>
+              <small>unidades</small>
+            </div>
+            <p id="stock-gap" class="target-conclusion"></p>
+          </article>
+        </div>
+
+        <div id="stock-insight" class="insight" role="status" aria-live="polite"></div>
+
+        <div class="chart-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="section-kicker">Nível de serviço</p>
+              <h2>Fill rate imediato por estoque</h2>
+              <p>A linha horizontal é a meta; a vertical é o estoque selecionado.</p>
+            </div>
+          </div>
+          <canvas id="fill-rate-chart" height="300" role="img" tabindex="0" aria-describedby="chart-instructions chart-live" aria-label="Fill rate imediato em função do estoque"></canvas>
+        </div>
+
+        <div class="control-slot" data-slot="stock"></div>
+
+        <div class="chart-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="section-kicker">Magnitude da falta</p>
+              <h2>Backorders esperados por estoque</h2>
+              <p>Cada unidade adicional reduz EBO; as curvas mostram quanto resta.</p>
+            </div>
+          </div>
+          <canvas id="ebo-chart" height="300" role="img" tabindex="0" aria-describedby="chart-instructions chart-live" aria-label="Backorders esperados em função do estoque"></canvas>
+        </div>
+
+        <aside class="metric-context">
+          <div class="context-badge">METRIC</div>
+          <p>Representa o pipeline da base por Poisson: <strong>variância = média</strong>.</p>
+          <div class="context-arrow" aria-hidden="true">→</div>
+          <div class="context-badge vari">VARI-METRIC</div>
+          <p>Preserva a mesma média, mas usa a variância adicional criada pela fila partilhada de backorders do depósito.</p>
+        </aside>
+        <p class="context-caveat">No modelo desta disciplina, o pipeline do depósito permanece Poisson. A binomial negativa aproxima a contagem no pipeline das bases; ela não substitui universalmente o processo de falhas.</p>
+      </section>
+
+      <section id="panel-mechanism" class="tab-panel" role="tabpanel" aria-labelledby="tab-mechanism" hidden>
+        <div class="mechanism-grid">
+          <article class="mechanism-card poisson-card">
+            <p class="section-kicker">Poisson</p>
+            <h2>Uma taxa fixa em todas as janelas</h2>
+            <div class="mechanism-flow">
+              <span class="flow-node">Λ = μ</span><span class="flow-arrow">→</span><span class="flow-node">X | Λ ∼ Poisson(Λ)</span>
+            </div>
+            <p>A variabilidade observada vem apenas da contagem de Poisson.</p>
+          </article>
+          <article class="mechanism-card nb-card">
+            <p class="section-kicker">Representação Gamma–Poisson</p>
+            <h2>Uma taxa latente que muda entre janelas</h2>
+            <div class="mechanism-flow">
+              <span class="flow-node">Λ ∼ Gamma</span><span class="flow-arrow">→</span><span class="flow-node">X | Λ ∼ Poisson(Λ)</span>
+            </div>
+            <p>Janelas calmas alternam com picos; marginalmente, X segue uma binomial negativa.</p>
+          </article>
+        </div>
+
+        <div class="simulation-controls">
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="periods-control">Janelas simuladas</label>
+              <output id="periods-output" for="periods-control">120</output>
+            </div>
+            <input id="periods-control" type="range" min="40" max="300" step="10" value="120">
+          </div>
+          <div class="control-group seed-group">
+            <div class="control-label-row"><label for="seed-control">Semente</label></div>
+            <input id="seed-control" type="number" min="0" max="999999" step="1" value="274">
+          </div>
+          <button id="new-sample" type="button" class="primary-button">Gerar nova amostra</button>
+        </div>
+
+        <div id="sample-summary" class="sample-summary" aria-live="polite"></div>
+
+        <div class="chart-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="section-kicker">Heterogeneidade latente</p>
+              <h2>Taxa Λ usada em cada janela</h2>
+              <p>A linha Poisson não se move. A taxa Gamma–Poisson varia em torno da mesma média.</p>
+            </div>
+          </div>
+          <canvas id="rate-chart" height="270" role="img" tabindex="0" aria-describedby="chart-instructions chart-live" aria-label="Taxas latentes por janela para Poisson e representação Gamma-Poisson"></canvas>
+        </div>
+
+        <div class="control-slot" data-slot="mechanism"></div>
+
+        <div class="chart-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="section-kicker">Contagens observadas</p>
+              <h2>Períodos calmos e picos de demanda</h2>
+              <p>As amostras são aleatórias; os valores teóricos permanecem os indicados no topo da página.</p>
+            </div>
+          </div>
+          <canvas id="sample-chart" height="300" role="img" tabindex="0" aria-describedby="chart-instructions chart-live" aria-label="Contagens simuladas por janela para Poisson e binomial negativa"></canvas>
+        </div>
+
+        <div class="learning-note">
+          <strong>Interpretação, não mecanismo físico obrigatório.</strong>
+          A mistura Gamma–Poisson mostra matematicamente como a sobredispersão pode surgir. No VARI-METRIC, a variância extra é calculada a partir da incerteza dos backorders do depósito. A simulação mantém a sequência Poisson de controle ao variar φ e, em φ = 1, acopla as duas amostras deliberadamente; amostras independentes da mesma distribuição não seriam idênticas.
+        </div>
+
+        <details class="discussion">
+          <summary>Perguntas para discussão em sala</summary>
+          <ol>
+            <li>Com φ = 1, o que acontece aos dois modelos e por quê?</li>
+            <li>Ao aumentar φ sem alterar μ, de que região sai a massa de probabilidade?</li>
+            <li>Por que duas distribuições com a mesma demanda média podem exigir estoques diferentes?</li>
+            <li>Qual indicador revela melhor a magnitude do risco: P(X &gt; s) ou EBO(s)?</li>
+          </ol>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <p><strong>Convenção:</strong> binomial negativa parametrizada por ν = μ/(φ − 1) e p = 1/φ. O parâmetro ν pode ser real. Quando φ → 1, a distribuição converge para Poisson.</p>
+      <p>A binomial negativa não é uma “binomial com sinal negativo” e não impõe um número máximo de ocorrências.</p>
+    </footer>
+  </div>
+
+  <div id="chart-tooltip" class="chart-tooltip" role="tooltip" aria-hidden="true"></div>
+  <script src="distributions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

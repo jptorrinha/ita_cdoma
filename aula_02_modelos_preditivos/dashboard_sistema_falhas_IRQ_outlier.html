@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Falhas Aeronáuticas — Com Outliers (IQR)</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-page:    #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-blue:    #2a78d6;
+    --seq-100: #cde2fb; --seq-200: #9ec5f4; --seq-300: #6da7ec;
+    --seq-400: #3987e5; --seq-500: #256abf; --seq-600: #184f95; --seq-700: #0d366b;
+    --status-good:     #0ca30c;
+    --status-warning:  #fab219;
+    --status-serious:  #ec835a;
+    --status-critical: #d03b3b;
+    --success-text:    #006300;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-page:    #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-blue:    #3987e5;
+      --seq-100: #184f95; --seq-200: #1c5cab; --seq-300: #256abf;
+      --seq-400: #3987e5; --seq-500: #5598e7; --seq-600: #86b6ef; --seq-700: #cde2fb;
+      --status-good:     #0ca30c;
+      --status-warning:  #fab219;
+      --status-serious:  #ec835a;
+      --status-critical: #d03b3b;
+      --success-text:    #0ca30c;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-page:    #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-blue:    #3987e5;
+    --seq-100: #184f95; --seq-200: #1c5cab; --seq-300: #256abf;
+    --seq-400: #3987e5; --seq-500: #5598e7; --seq-600: #86b6ef; --seq-700: #cde2fb;
+    --status-good:     #0ca30c;
+    --status-warning:  #fab219;
+    --status-serious:  #ec835a;
+    --status-critical: #d03b3b;
+    --success-text:    #0ca30c;
+  }
+
+  .viz-root {
+    background: var(--surface-page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 32px 20px 64px;
+    box-sizing: border-box;
+  }
+  .viz-root * { box-sizing: border-box; }
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  header.page-head { margin-bottom: 28px; }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-muted); margin: 0 0 8px;
+  }
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .sub { font-size: 14.5px; color: var(--text-secondary); line-height: 1.55; max-width: 720px; margin: 0; }
+  .sub code { background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+
+  section { margin-bottom: 32px; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  h2 {
+    font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--text-muted); margin: 0 0 16px;
+  }
+  h2 .h2-note { text-transform: none; letter-spacing: normal; font-weight: 400; color: var(--text-muted); }
+
+  /* Comparison strip */
+  .compare-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .compare-strip { grid-template-columns: 1fr; } }
+  .compare-card {
+    border-radius: 12px; padding: 16px 18px; border: 1px solid var(--border);
+    background: var(--surface-1);
+  }
+  .compare-card.active { border-color: var(--series-blue); border-width: 2px; padding: 15px 17px; }
+  .compare-tag {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 0 0 8px;
+  }
+  .compare-tag.this-file { color: var(--series-blue); }
+  .compare-title { font-size: 14px; font-weight: 700; margin: 0 0 12px; }
+  .compare-rows { display: flex; flex-direction: column; gap: 6px; }
+  .compare-row { display: flex; justify-content: space-between; font-size: 13px; }
+  .compare-row .cr-label { color: var(--text-secondary); }
+  .compare-row .cr-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* KPI row */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .kpi-label { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 8px; }
+  .kpi-value { font-size: 28px; font-weight: 700; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11.5px; font-weight: 600; padding: 3px 9px 3px 7px; border-radius: 999px;
+  }
+  .badge.good { background: var(--status-good); color: #ffffff; }
+  .badge.warning { background: var(--status-warning); color: #0b0b0b; }
+  .badge.critical { background: var(--status-critical); color: #ffffff; }
+
+  /* Confusion matrix */
+  .cm-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: start; }
+  @media (max-width: 720px) { .cm-layout { grid-template-columns: 1fr; } }
+  .cm-grid { display: grid; grid-template-columns: auto repeat(2, 1fr); grid-template-rows: auto auto auto; gap: 3px; max-width: 420px; }
+  .cm-cell {
+    border-radius: 6px; padding: 14px 10px; text-align: center; position: relative;
+  }
+  .cm-cell .cm-pct { font-size: 21px; font-weight: 700; line-height: 1.1; }
+  .cm-cell .cm-n { font-size: 11.5px; margin-top: 4px; opacity: .85; }
+  .cm-cell .cm-tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; margin-top: 5px; opacity: .8; }
+  .cm-axis-label { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; justify-content: center; text-align: center; padding: 4px; }
+  .cm-corner { }
+  .cm-col-head { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-align: center; padding-bottom: 2px; }
+  .cm-row-head { font-size: 11px; font-weight: 600; color: var(--text-secondary); display:flex; align-items:center; justify-content:flex-end; padding-right:8px; writing-mode: vertical-rl; transform: rotate(180deg); }
+
+  .legend-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-secondary); margin-top: 14px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.data-table th, table.data-table td {
+    text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--gridline);
+    font-variant-numeric: tabular-nums;
+  }
+  table.data-table th:first-child, table.data-table td:first-child { text-align: left; font-variant-numeric: normal; }
+  table.data-table thead th { color: var(--text-muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; border-bottom: 1px solid var(--baseline); }
+  table.data-table tbody tr:last-child td { border-bottom: none; }
+  table.data-table td.hero-row, table.data-table tr.hero td { font-weight: 700; color: var(--text-primary); }
+  tr.row-safety td { background: color-mix(in oklab, var(--status-good) 8%, transparent); }
+
+  /* Bar chart (FN vs FP) */
+  .bars-card svg { width: 100%; height: auto; display: block; }
+  .bar-tooltip-hint { font-size: 11.5px; color: var(--text-muted); margin-top: 10px; }
+
+  /* Stacked GO/NO-GO */
+  .stack-wrap { }
+  .stack-bar { display: flex; width: 100%; height: 34px; border-radius: 7px; overflow: hidden; }
+  .stack-seg { display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 600; color: #ffffff; white-space: nowrap; }
+  .stack-legend { display: flex; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
+  .stack-legend-item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-secondary); }
+  .stack-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* Verdict banners */
+  .verdict-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .verdict-row { grid-template-columns: 1fr; } }
+  .verdict {
+    border-radius: 12px; padding: 16px 18px; border: 1px solid var(--border);
+  }
+  .verdict.bad { background: color-mix(in oklab, var(--status-critical) 10%, var(--surface-1)); }
+  .verdict.ok { background: color-mix(in oklab, var(--status-good) 10%, var(--surface-1)); }
+  .verdict-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 0 0 6px; }
+  .verdict-headline { font-size: 17px; font-weight: 700; margin: 0 0 4px; display:flex; align-items:center; gap:8px; }
+  .verdict-detail { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+
+  footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--gridline); }
+  footer p { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0 0 6px; max-width: 720px; }
+  footer code { background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+  @media (max-width: 720px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<style>body{margin:0;}</style>
+
+<div class="viz-root">
+  <div class="wrap">
+
+    <header class="page-head">
+      <p class="eyebrow">TE-292 · Aula 2 — Modelos preditivos</p>
+      <h1>Sistema de falhas aeronáuticas — com tratamento de outliers (IQR)</h1>
+      <p class="sub">
+        Decisão GO / NO-GO para manutenção preditiva, construída sobre o modelo LightGBM de
+        <code>modelo_preditivo.ipynb</code> e a metodologia de <code>CONFUSION_MATRIX_GUIDE.md</code>.
+        Base: AI4I 2020 (fresadora industrial, usada como proxy didático para um motor aeronáutico) ·
+        3.000 registros de teste, 107 falhas reais. <strong>speed_rpm</strong> e <strong>torque_nm</strong>
+        passam por <em>capping</em> de 1,5×IQR antes do treino (método atualizado de STD para IQR).
+      </p>
+    </header>
+
+    <section>
+      <h2>Duas visões, mesmo modelo <span class="h2-note">— com vs. sem tratamento de outliers</span></h2>
+      <div class="compare-strip">
+        <div class="compare-card">
+          <p class="compare-tag">📄 dashboard_..._IRQ_no-outlier.html</p>
+          <p class="compare-title">Sem tratamento — dados brutos</p>
+          <div class="compare-rows">
+            <div class="compare-row"><span class="cr-label">Recall (limiar 0,5)</span><span class="cr-value">76,6%</span></div>
+            <div class="compare-row"><span class="cr-label">Precisão</span><span class="cr-value">71,9%</span></div>
+            <div class="compare-row"><span class="cr-label">Custo esperado</span><span class="cr-value">US$ 25,3M</span></div>
+            <div class="compare-row"><span class="cr-label">Falhas afetadas pelo cap</span><span class="cr-value">0 de 339</span></div>
+          </div>
+        </div>
+        <div class="compare-card active">
+          <p class="compare-tag this-file">📄 Este arquivo</p>
+          <p class="compare-title">Com tratamento — cap por 1,5×IQR</p>
+          <div class="compare-rows">
+            <div class="compare-row"><span class="cr-label">Recall (limiar 0,5)</span><span class="cr-value">74,8%</span></div>
+            <div class="compare-row"><span class="cr-label">Precisão</span><span class="cr-value">70,2%</span></div>
+            <div class="compare-row"><span class="cr-label">Custo esperado</span><span class="cr-value">US$ 27,3M</span></div>
+            <div class="compare-row"><span class="cr-label">Falhas afetadas pelo cap</span><span class="cr-value">72 de 339</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="bar-tooltip-hint" style="margin-top: 12px;">
+        <strong>Nesta base, o tratamento piora o resultado.</strong> Mesmo o IQR — mais robusto que STD por não
+        assumir distribuição normal — ainda limita 1,5× o intervalo interquartil de <code>speed_rpm</code> e
+        <code>torque_nm</code>, e isso toca 21% das falhas reais (72 de 339) antes do treino. Ver painel abaixo.
+      </p>
+    </section>
+
+    <section>
+      <h2>Tratamento de outliers aplicado nesta versão <span class="h2-note">— cap por 1,5×IQR</span></h2>
+      <div class="card">
+        <table class="data-table">
+          <thead>
+            <tr><th>Coluna</th><th>Método</th><th>Limites</th><th>Registros afetados</th><th>Falhas afetadas</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>speed_rpm</td><td>cap 1,5×IQR</td><td>[1.139,5 – 1.895,5] rpm</td><td>418</td><td>35</td></tr>
+            <tr><td>torque_nm</td><td>cap 1,5×IQR</td><td>[12,8 – 67,2] Nm</td><td>69</td><td>62</td></tr>
+          </tbody>
+        </table>
+        <p class="bar-tooltip-hint">
+          Impacto conjunto: <strong>459 registros</strong> tiveram ao menos um valor limitado, incluindo
+          <strong>72 das 339 falhas reais (21,2%)</strong>. Como consequência, <code>mec_power_w</code> — construída
+          a partir dos dois valores capados — perde parte da sua faixa física: de 1.148–10.470 W para
+          2.541–9.866 W, comendo justamente a borda que codifica a regra determinística de <code>power_f</code>
+          da aula 1 (potência fora de [3.500, 9.000] W).
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Métricas de segurança <span class="h2-note">— limiar padrão (0,5)</span></h2>
+      <div class="kpi-row">
+        <div class="kpi">
+          <p class="kpi-label">Recall (detecção)</p>
+          <p class="kpi-value">74,8%</p>
+          <span class="badge critical">⚠ abaixo da meta (95%)</span>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">Miss rate (falhas perdidas)</p>
+          <p class="kpi-value">25,2%</p>
+          <span class="badge critical">⚠ risco de segurança</span>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">Specificity (negativos corretos)</p>
+          <p class="kpi-value">98,8%</p>
+          <span class="badge good">✓ dentro do esperado</span>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">Taxa de falso alarme</p>
+          <p class="kpi-value">1,2%</p>
+          <span class="badge good">✓ baixa</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Matriz de confusão <span class="h2-note">— proporção do real (Option 3, recomendada para aviação)</span></h2>
+      <div class="card">
+        <div class="cm-layout">
+          <div>
+            <div class="cm-grid">
+              <div class="cm-corner"></div>
+              <div class="cm-col-head">Previsto: sem falha</div>
+              <div class="cm-col-head">Previsto: falha</div>
+
+              <div class="cm-row-head">Real: sem falha</div>
+              <div class="cm-cell" style="background: var(--seq-600); color:#fff;">
+                <div class="cm-pct">98,8%</div>
+                <div class="cm-n">2.859 de 2.893 · TN</div>
+                <div class="cm-tag">Specificity</div>
+              </div>
+              <div class="cm-cell" style="background: var(--seq-100); color: var(--text-primary);">
+                <div class="cm-pct">1,2%</div>
+                <div class="cm-n">34 de 2.893 · FP</div>
+                <div class="cm-tag">Falso alarme</div>
+              </div>
+
+              <div class="cm-row-head">Real: falha</div>
+              <div class="cm-cell" style="background: var(--seq-200); color: var(--text-primary);">
+                <div class="cm-pct">25,2%</div>
+                <div class="cm-n">27 de 107 · FN</div>
+                <div class="cm-tag">Miss rate ⚠</div>
+              </div>
+              <div class="cm-cell" style="background: var(--seq-500); color:#fff;">
+                <div class="cm-pct">74,8%</div>
+                <div class="cm-n">80 de 107 · TP</div>
+                <div class="cm-tag">Recall</div>
+              </div>
+            </div>
+            <div class="legend-row">
+              <span class="legend-swatch" style="background: var(--seq-600);"></span> mais escuro = maior % dentro da linha (do que é <em>real</em>)
+            </div>
+          </div>
+
+          <div>
+            <table class="data-table" aria-label="Matriz de confusão em contagens absolutas">
+              <thead>
+                <tr><th>Contagem</th><th>Previsto 0</th><th>Previsto 1</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Real 0 (sem falha)</td><td>2.859 (TN)</td><td>34 (FP)</td></tr>
+                <tr><td>Real 1 (falha)</td><td>27 (FN)</td><td>80 (TP)</td></tr>
+              </tbody>
+            </table>
+            <p class="bar-tooltip-hint">
+              Leitura de segurança: de 107 falhas reais no conjunto de teste, o modelo no limiar padrão
+              deixa <strong>27 passarem sem alerta</strong> — 2 a mais que na versão sem tratamento.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Comparação de limiares de decisão</h2>
+      <div class="card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Cenário</th><th>Limiar</th><th>Recall</th><th>Precisão</th>
+              <th>Falso alarme</th><th>F2</th><th>FN</th><th>FP</th><th>Custo esperado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Padrão (0,5)</td><td>0,500</td><td>74,8%</td><td>70,2%</td>
+              <td>1,2%</td><td>0,738</td><td>27</td><td>34</td><td>US$ 27.340.000</td>
+            </tr>
+            <tr>
+              <td>Ótimo F2</td><td>0,410</td><td>77,6%</td><td>66,4%</td>
+              <td>1,5%</td><td>0,750</td><td>24</td><td>42</td><td>US$ 24.420.000</td>
+            </tr>
+            <tr class="row-safety hero">
+              <td>Segurança (recall ≥ 95%)</td><td>0,0012</td><td>95,3%</td><td>14,2%</td>
+              <td>21,4%</td><td>0,444</td><td>5</td><td>618</td><td>US$ 11.180.000</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="bar-tooltip-hint">
+          Custo: US$ 1.000.000 por falha perdida (FN), US$ 10.000 por alarme falso (FP) — valores do guia.
+          O F2 do cenário de segurança <em>parece</em> pior (0,444 vs 0,738) porque a precisão despenca —
+          mas é o único cenário que cumpre a meta regulatória de recall e reduz o custo esperado em ~59%.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Falhas perdidas vs. alarmes falsos, por cenário</h2>
+      <div class="card bars-card">
+        <svg viewBox="0 0 860 300" role="img" aria-label="Gráfico de barras comparando falsos negativos e falsos positivos nos três cenários de limiar">
+          <!-- gridlines -->
+          <g stroke="var(--gridline)" stroke-width="1">
+            <line x1="70" y1="20" x2="70" y2="250"></line>
+            <line x1="70" y1="250" x2="820" y2="250"></line>
+          </g>
+          <!-- y ticks: 0, 200, 400, 600, 800 -->
+          <g font-size="11" fill="var(--text-muted)" font-family="system-ui, sans-serif">
+            <text x="60" y="253" text-anchor="end">0</text>
+            <text x="60" y="196" text-anchor="end">200</text>
+            <text x="60" y="139" text-anchor="end">400</text>
+            <text x="60" y="82" text-anchor="end">600</text>
+            <text x="60" y="25" text-anchor="end">800</text>
+          </g>
+          <g stroke="var(--gridline)" stroke-width="1" stroke-dasharray="0">
+            <line x1="70" y1="196" x2="820" y2="196"></line>
+            <line x1="70" y1="139" x2="820" y2="139"></line>
+            <line x1="70" y1="82"  x2="820" y2="82"></line>
+            <line x1="70" y1="25"  x2="820" y2="25"></line>
+          </g>
+
+          <!-- scale: 230px = 800 units -> 0.2875 px/unit -->
+          <!-- Group 1: Padrao — FN 27, FP 34 -->
+          <g>
+            <rect x="140" y="242.24" width="24" height="7.76" rx="4" fill="var(--status-critical)"><title>Padrão (0,5) · FN = 27 falhas perdidas</title></rect>
+            <text x="152" y="235" text-anchor="middle" font-size="11.5" fill="var(--text-primary)" font-weight="600">27</text>
+            <rect x="170" y="240.23" width="24" height="9.77" rx="4" fill="var(--status-warning)"><title>Padrão (0,5) · FP = 34 alarmes falsos</title></rect>
+            <text x="182" y="233" text-anchor="middle" font-size="11.5" fill="var(--text-primary)" font-weight="600">34</text>
+            <text x="167" y="270" text-anchor="middle" font-size="12" fill="var(--text-secondary)">Padrão</text>
+            <text x="167" y="284" text-anchor="middle" font-size="10.5" fill="var(--text-muted)">limiar 0,500</text>
+          </g>
+
+          <!-- Group 2: F2 otimo — FN 24, FP 42 -->
+          <g>
+            <rect x="370" y="243.1" width="24" height="6.9" rx="4" fill="var(--status-critical)"><title>Ótimo F2 (0,41) · FN = 24 falhas perdidas</title></rect>
+            <text x="382" y="236" text-anchor="middle" font-size="11.5" fill="var(--text-primary)" font-weight="600">24</text>
+            <rect x="400" y="237.93" width="24" height="12.07" rx="4" fill="var(--status-warning)"><title>Ótimo F2 (0,41) · FP = 42 alarmes falsos</title></rect>
+            <text x="412" y="231" text-anchor="middle" font-size="11.5" fill="var(--text-primary)" font-weight="600">42</text>
+            <text x="397" y="270" text-anchor="middle" font-size="12" fill="var(--text-secondary)">Ótimo F2</text>
+            <text x="397" y="284" text-anchor="middle" font-size="10.5" fill="var(--text-muted)">limiar 0,410</text>
+          </g>
+
+          <!-- Group 3: Seguranca — FN 5, FP 618 -->
+          <g>
+            <rect x="600" y="248.56" width="24" height="1.44" rx="1" fill="var(--status-critical)"><title>Segurança (recall≥95%) · FN = 5 falhas perdidas</title></rect>
+            <text x="612" y="243" text-anchor="middle" font-size="11.5" fill="var(--text-primary)" font-weight="600">5</text>
+            <rect x="630" y="72.33" width="24" height="177.67" rx="4" fill="var(--status-warning)"><title>Segurança (recall≥95%) · FP = 618 alarmes falsos</title></rect>
+            <text x="642" y="66" text-anchor="middle" font-size="11.5" fill="var(--text-primary)" font-weight="600">618</text>
+            <text x="627" y="270" text-anchor="middle" font-size="12" fill="var(--text-secondary)">Segurança</text>
+            <text x="627" y="284" text-anchor="middle" font-size="10.5" fill="var(--text-muted)">limiar 0,001</text>
+          </g>
+        </svg>
+        <div class="legend-row" style="margin-top: 2px;">
+          <span class="legend-swatch" style="background: var(--status-critical);"></span> FN — falha perdida (catastrófico)
+          <span style="width:14px;"></span>
+          <span class="legend-swatch" style="background: var(--status-warning);"></span> FP — alarme falso (caro, mas seguro)
+        </div>
+        <p class="bar-tooltip-hint">Passe o cursor sobre uma barra para ver o valor exato e o cenário. Note a escala: 618 alarmes falsos é o preço de reduzir falhas perdidas de 27 para 5.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Veredito do sistema no conjunto de teste <span class="h2-note">— limiar de segurança, 3.000 registros</span></h2>
+      <div class="card">
+        <div class="stack-wrap">
+          <div class="stack-bar">
+            <div class="stack-seg" style="width: 76.0%; background: var(--status-good);" title="GO — liberar operação: 2.280 registros (76,0%)">GO · 2.280 (76,0%)</div>
+            <div class="stack-seg" style="width: 24.0%; background: var(--status-warning); color:#0b0b0b;" title="NO-GO — inspecionar: 720 registros (24,0%)">NO-GO · 720 (24,0%)</div>
+          </div>
+          <div class="stack-legend">
+            <div class="stack-legend-item"><span class="stack-legend-dot" style="background: var(--status-good);"></span> GO — liberar operação</div>
+            <div class="stack-legend-item"><span class="stack-legend-dot" style="background: var(--status-warning);"></span> NO-GO — inspecionar antes de operar</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Veredito de segurança</h2>
+      <div class="verdict-row">
+        <div class="verdict bad">
+          <p class="verdict-title">Limiar padrão (0,5)</p>
+          <p class="verdict-headline">❌ INSUFICIENTE</p>
+          <p class="verdict-detail">74,8% de detecção fica abaixo dos ≥95% exigidos para sistemas de segurança
+            crítica — pior que os 76,6% da versão sem tratamento. 25,2% das falhas reais passariam despercebidas.</p>
+        </div>
+        <div class="verdict ok">
+          <p class="verdict-title">Limiar de segurança (0,0012)</p>
+          <p class="verdict-headline">✅ ACEITÁVEL</p>
+          <p class="verdict-detail">95,3% de detecção atinge a meta, ao custo de um NO-GO em quase 1 a cada 4
+            registros — e ainda assim reduz o custo esperado total de US$ 27,3M para US$ 11,2M.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>Modelo: LightGBM (<code>scale_pos_weight</code> balanceado), 6 features físicas + potência mecânica derivada.
+      Conjunto de teste: 3.000 registros, split estratificado por <code>Type</code>. Custos: US$ 1.000.000 por falha
+      perdida, US$ 10.000 por alarme falso (<code>CONFUSION_MATRIX_GUIDE.md</code>).</p>
+      <p>Gerado a partir de <code>aula_02_modelos_preditivos/modelo_preditivo.ipynb</code> tal como está — inclui o
+      tratamento de outliers por <code>method="IQR"</code>, <code>factor=1.5</code> em <code>speed_rpm</code> e
+      <code>torque_nm</code>. Compare com <code>dashboard_sistema_falhas_IRQ_no-outlier.html</code>, gerado pela
+      mesma pipeline pulando essa etapa.</p>
+    </footer>
+
+  </div>
+</div>
+</body>
+</html>

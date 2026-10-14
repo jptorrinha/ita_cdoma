@@ -1,0 +1,129 @@
+
+[[base]]
+id      = 0
+name    = "BACO"
+dtrans  = 100.0    # OST: order-and-ship time, depot -> base (days, mean)
+assets  = 10       # number of assets/aircraft/systems
+duty_cycle = 0.1
+grounded = 70000.0 # grounded or unavailability cost per day
+
+[[base]]
+id      = 1
+name    = "BAFL"
+dtrans  = 50.0     # OST: order-and-ship time, depot -> base (days, mean)
+assets  = 15       # number of assets/aircraft/systems
+duty_cycle = 0.15
+grounded = 65000.0
+
+# N items
+# minimize sum( grounded * EBO(s_j) + cost_j * s_j ), for j in {1,2,3,...,N}
+# r and brt follow the aula's own worked numerical example (slide 8):
+# 30% of failures are repaired at the base itself, in 3 days.
+
+[[part]]
+name   = "Part_01"
+cost   = 9000.00 # the purchase price of LRUi, also viewed as investment cost
+lambda_ = 0.00001 # the constant failure rate (or demand rate)
+qpa    = 1       # the demand rate is proportional to the quantity per assembly
+drt    = 50.0     # depot repair time in days (mean)
+r      = 0.3      # fraction of demand repaired at the base
+brt    = 3.0      # base repair time in days (mean)
+
+[[part]]
+name   = "Part_02"
+cost   = 10000.00
+lambda_ = 0.00002
+qpa    = 1
+drt    = 70.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_03"
+cost   = 11000.00
+lambda_ = 0.00003
+qpa    = 1
+drt    = 90.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_04"
+cost   = 12000.00
+lambda_ = 0.00004
+qpa    = 1
+drt    = 110.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_05"
+cost   = 13000.00
+lambda_ = 0.00005
+qpa    = 1
+drt    = 130.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_06"
+cost   = 14000.00
+lambda_ = 0.00006
+qpa    = 1
+drt    = 150.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_07"
+cost   = 15000.00
+lambda_ = 0.00007
+qpa    = 1
+drt    = 170.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_08"
+cost   = 16000.00
+lambda_ = 0.00008
+qpa    = 1
+drt    = 190.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_09"
+cost   = 17000.00
+lambda_ = 0.00009
+qpa    = 2
+drt    = 210.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_10"
+cost   = 18000.00
+lambda_ = 0.00010
+qpa    = 2
+drt    = 230.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_11"
+cost   = 19000.00
+lambda_ = 0.00011
+qpa    = 4
+drt    = 240.0
+r      = 0.3
+brt    = 3.0
+
+[[part]]
+name   = "Part_12"
+cost   = 20000.00
+lambda_ = 0.00012
+qpa    = 4
+drt    = 250.0
+r      = 0.3
+brt    = 3.0

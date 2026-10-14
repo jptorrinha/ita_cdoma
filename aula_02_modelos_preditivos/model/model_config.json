@@ -1,0 +1,25 @@
+{
+  "features": [
+    "air_temp_k",
+    "process_temp_k",
+    "speed_rpm",
+    "torque_nm",
+    "tool_wear_min",
+    "mec_power_w"
+  ],
+  "thresholds": {
+    "default": 0.5,
+    "f2_optimal": 0.49,
+    "safety_recall_95": 0.000959
+  },
+  "recommended_threshold": 0.000959,
+  "costs_usd": {
+    "false_negative": 1000000,
+    "false_positive": 10000
+  },
+  "test_set_metrics_at_recommended_threshold": {
+    "recall": 0.9532710280373832,
+    "precision": 0.13545816733067728,
+    "f2": 0.43183742591024554
+  }
+}

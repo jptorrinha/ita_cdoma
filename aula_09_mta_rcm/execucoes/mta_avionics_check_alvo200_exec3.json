@@ -1,0 +1,100 @@
+{
+  "id": "mta_avionics_check_alvo200_exec3",
+  "horario": "2026-10-14T09:15:51-03:00",
+  "parametros": {
+    "scenario": "avionics_check",
+    "target_time": 200,
+    "num_simulations": 5000
+  },
+  "resposta": {
+    "num_simulations": 5000,
+    "num_subtasks": 9,
+    "risk_color": "danger",
+    "risk_level": "HIGH",
+    "scenario_name": "Avionics Post-Maintenance Check",
+    "stats": {
+      "deterministic_mttr": 170,
+      "mean": 236.31305086356952,
+      "median": 232.61004261283986,
+      "std": 54.42497124329321,
+      "min": 145.25678709782636,
+      "max": 504.55158103566066,
+      "p50": 232.61004261283986,
+      "p75": 268.02519851863235,
+      "p90": 308.57694305928084,
+      "p95": 336.66104764929383,
+      "p99": 384.685930974421,
+      "prob_on_time": 0.32,
+      "prob_within_10pct": 0.3828,
+      "prob_within_20pct": 0.5714,
+      "time_at_risk": 36.313050863569515,
+      "coefficient_of_variation": 23.030878338883763
+    },
+    "subtask_table": [
+      {
+        "Subtask": "Perform Manual Function Checks",
+        "MTTR": 30,
+        "Variance": 9.125831511687329,
+        "Std Dev": 3.0208991230571285,
+        "% of Total Variance": 25.398437928346567
+      },
+      {
+        "Subtask": "Test Navigation Systems",
+        "MTTR": 25,
+        "Variance": 6.2005683932069235,
+        "Std Dev": 2.490094053084526,
+        "% of Total Variance": 17.257030359769963
+      },
+      {
+        "Subtask": "Execute Built-In Test (BIT)",
+        "MTTR": 25,
+        "Variance": 6.1271376479177135,
+        "Std Dev": 2.4753055665751074,
+        "% of Total Variance": 17.052662546944173
+      },
+      {
+        "Subtask": "Verify Communication Systems",
+        "MTTR": 20,
+        "Variance": 4.022121718063108,
+        "Std Dev": 2.0055228041742903,
+        "% of Total Variance": 11.194115151660556
+      },
+      {
+        "Subtask": "Connect Test Equipment",
+        "MTTR": 20,
+        "Variance": 3.973680136656968,
+        "Std Dev": 1.9934091744187814,
+        "% of Total Variance": 11.059295601582395
+      },
+      {
+        "Subtask": "Power Up Aircraft Systems",
+        "MTTR": 15,
+        "Variance": 2.2572329897268446,
+        "Std Dev": 1.502409062048963,
+        "% of Total Variance": 6.28218830316683
+      },
+      {
+        "Subtask": "Record Test Results",
+        "MTTR": 15,
+        "Variance": 2.234390383025415,
+        "Std Dev": 1.4947877384516555,
+        "% of Total Variance": 6.2186142028029465
+      },
+      {
+        "Subtask": "Review Technical Data and Setup",
+        "MTTR": 10,
+        "Variance": 1.008181714741378,
+        "Std Dev": 1.004082523870114,
+        "% of Total Variance": 2.8059076775151204
+      },
+      {
+        "Subtask": "Power Down and Secure Aircraft",
+        "MTTR": 10,
+        "Variance": 0.9815357201627328,
+        "Std Dev": 0.9907248458390113,
+        "% of Total Variance": 2.7317482282114542
+      }
+    ],
+    "success": true
+  }
+}

@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="" description="">
+	<nodes>
+		<node id="0" name="CSV File Import" qualified_name="Orange.widgets.data.owcsvimport.OWCSVFileImport" project_name="Orange3" version="" title="ai4i2020" position="(-439.0, 190.0769230769231)" />
+		<node id="1" name="Edit Domain" qualified_name="Orange.widgets.data.oweditdomain.OWEditDomain" project_name="Orange3" version="" title="Edit Domain (1)" position="(-305.0, 192.0)" />
+		<node id="2" name="Formula" qualified_name="Orange.widgets.data.owfeatureconstructor.OWFeatureConstructor" project_name="Orange3" version="" title="Formula" position="(-178.0, 190.0)" />
+		<node id="3" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="Data Table" position="(-31.0, 130.0)" />
+		<node id="4" name="Column Statistics" qualified_name="Orange.widgets.data.owfeaturestatistics.OWFeatureStatistics" project_name="Orange3" version="" title="Column Statistics" position="(-35.0, 247.0)" />
+	</nodes>
+	<links>
+		<link id="0" source_node_id="0" sink_node_id="1" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="1" source_node_id="1" sink_node_id="2" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="2" source_node_id="2" sink_node_id="3" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="3" source_node_id="2" sink_node_id="4" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+	</links>
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties node_id="0" format="literal">{'_session_items': [], '_session_items_v2': [({'type': 'VarPath', 'name': 'basedir', 'relpath': 'data/ai4i2020.csv'}, {'encoding': 'utf-8', 'delimiter': ',', 'quotechar': '"', 'doublequote': True, 'skipinitialspace': True, 'quoting': 0, 'columntypes': [{'start': 0, 'stop': 14, 'value': 'Auto'}], 'rowspec': [{'start': 0, 'stop': 1, 'value': 'Header'}], 'decimal_separator': '.', 'group_separator': ''}), ({'type': 'VarPath', 'name': 'basedir', 'relpath': 'ai4i2020.csv'}, {'encoding': 'utf-8', 'delimiter': ',', 'quotechar': '"', 'doublequote': True, 'skipinitialspace': True, 'quoting': 0, 'columntypes': [{'start': 0, 'stop': 14, 'value': 'Auto'}], 'rowspec': [{'start': 0, 'stop': 1, 'value': 'Header'}], 'decimal_separator': '.', 'group_separator': ''})], 'compatibility_mode': False, 'controlAreaVisible': True, 'dialog_state': {'directory': '/home/celio/Documents/GitHub/CDOMA/AULAS/aula_01_introducao_panorama/data', 'filter': 'Text - comma separated (*.csv, *)'}, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x03\x00\x00\x00\x00\x07k\x00\x00\x01Z\x00\x00\x08\x9f\x00\x00\x02\xc2\x00\x00\x07k\x00\x00\x01\x7f\x00\x00\x08\x9f\x00\x00\x02\xc2\x00\x00\x00\x00\x00\x00\x00\x00\x07\x80\x00\x00\x07k\x00\x00\x01\x7f\x00\x00\x08\x9f\x00\x00\x02\xc2', '__version__': 3}</properties>
+		<properties node_id="1" format="pickle">gASVuwIAAAAAAAB9lCiMFF9kb21haW5fY2hhbmdlX2hpbnRzlH2UKIwLQ2F0ZWdvcmljYWyUjANU
+V0aUjAEwlIwBMZSGlCmHlIaUXZSMBlJlbmFtZZSMCFRvb2xXZWFylIWUhpRhaAOMA0hERpRoBWgG
+hpQph5SGlF2UaAuMCEhlYXREaXNzlIWUhpRhaAOMA1BXRpRoBWgGhpQph5SGlF2UaAuMBVBvd2Vy
+lIWUhpRhaAOMA09TRpRoBWgGhpQph5SGlF2UaAuMCk92ZXJzdHJhaW6UhZSGlGFoA4wDUk5GlGgF
+aAaGlCmHlIaUXZRoC4wGUmFuZG9tlIWUhpRhjARSZWFslIwTQWlyIHRlbXBlcmF0dXJlIFtLXZRL
+A4wBZpSGlCmHlIaUXZRoC4wHQWlyVGVtcJSFlIaUYWgvjBdQcm9jZXNzIHRlbXBlcmF0dXJlIFtL
+XZRLA2gxhpQph5SGlF2UaAuMCFByb2NUZW1wlIWUhpRhaC+MFlJvdGF0aW9uYWwgc3BlZWQgW3Jw
+bV2USwBoMYaUKYeUhpRdlGgLjANSUE2UhZSGlGFoL4wLVG9ycXVlIFtObV2USwNoMYaUKYeUhpRd
+lGgLjAZUb3JxdWWUhZSGlGFoL4wPVG9vbCB3ZWFyIFttaW5dlEsAaDGGlCmHlIaUXZRoC4wMVG9v
+bFdlYXJfbWlulIWUhpRhdYwWX21lcmdlX2RpYWxvZ19zZXR0aW5nc5R9lIwSY29udHJvbEFyZWFW
+aXNpYmxllIiMEW91dHB1dF90YWJsZV9uYW1llIwAlIwTc2F2ZWRXaWRnZXRHZW9tZXRyeZRDQgHZ
+0MsAAwAAAAAHMgAAAOgAAAnNAAADkgAABzIAAAENAAAJzQAAA5IAAAAAAAAAAAeAAAAHMgAAAQ0A
+AAnNAAADkpSMC19fdmVyc2lvbl9flEsFdS4=
+</properties>
+		<properties node_id="2" format="pickle">gASVSAEAAAAAAAB9lCiMEmNvbnRyb2xBcmVhVmlzaWJsZZSIjAxjdXJyZW50SW5kZXiUSwCMC2Rl
+c2NyaXB0b3JzlF2UjChPcmFuZ2Uud2lkZ2V0cy5kYXRhLm93ZmVhdHVyZWNvbnN0cnVjdG9ylIwU
+Q29udGludW91c0Rlc2NyaXB0b3KUk5QojAlQb3dlckNvbnOUjBZSUE0qVG9ycXVlKjIqMy4xNDE2
+LzYwlE6JdJSBlGGMF2V4cHJlc3Npb25zX3dpdGhfdmFsdWVzlImME3NhdmVkV2lkZ2V0R2VvbWV0
+cnmUQ0IB2dDLAAMAAAAACRwAAADVAAALbwAAAu0AAAkcAAAA+gAAC28AAALtAAAAAAAAAAAHgAAA
+CRwAAAD6AAALbwAAAu2UjAtfX3ZlcnNpb25fX5RLBIwQY29udGV4dF9zZXR0aW5nc5RdlHUu
+</properties>
+		<properties node_id="3" format="literal">{'auto_commit': True, 'color_by_class': True, 'controlAreaVisible': True, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x03\x00\x00\x00\x00\x06\x90\x00\x00\x018\x00\x00\r8\x00\x00\x03\x17\x00\x00\x06\x90\x00\x00\x018\x00\x00\r8\x00\x00\x03\x17\x00\x00\x00\x00\x00\x00\x00\x00\x07\x80\x00\x00\x06\x90\x00\x00\x018\x00\x00\r8\x00\x00\x03\x17', 'select_rows': True, 'show_attribute_labels': True, 'show_distributions': True, 'stored_selection': {'rows': [], 'columns': []}, 'stored_sort': [], '__version__': 1}</properties>
+		<properties node_id="4" format="pickle">gASVLwIAAAAAAAB9lCiMC2F1dG9fY29tbWl0lIiMEmNvbnRyb2xBcmVhVmlzaWJsZZSIjBNzYXZl
+ZFdpZGdldEdlb21ldHJ5lENCAdnQywADAAAAAAcHAAAA7AAAC1cAAAPAAAAHBwAAAOwAAAtXAAAD
+wAAAAAAAAAAAB4AAAAcHAAAA7AAAC1cAAAPAlIwHc29ydGluZ5RLAIwDc2lwlIwOX3VucGlja2xl
+X2VudW2Uk5SMDFB5UXQ1LlF0Q29yZZSMCVNvcnRPcmRlcpRLAIeUUpSGlIwLX192ZXJzaW9uX1+U
+SwKMEGNvbnRleHRfc2V0dGluZ3OUXZSMFW9yYW5nZXdpZGdldC5zZXR0aW5nc5SMB0NvbnRleHSU
+k5QpgZR9lCiMBnZhbHVlc5R9lCiMCWNvbG9yX3ZhcpROSv7///+GlIwNc2VsZWN0ZWRfdmFyc5Rd
+lGgOSwJ1jAphdHRyaWJ1dGVzlH2UKIwDVURJlEsCjARUeXBllEsBjAdBaXJUZW1wlEsCjAhQcm9j
+VGVtcJRLAowDUlBNlEsCjAZUb3JxdWWUSwKMDFRvb2xXZWFyX21pbpRLAowPTWFjaGluZSBmYWls
+dXJllEsBjAhUb29sV2VhcpRLAYwISGVhdERpc3OUSwGMBVBvd2VylEsBjApPdmVyc3RyYWlulEsB
+jAZSYW5kb22USwGMCVBvd2VyQ29uc5RLAnWMBW1ldGFzlH2UjApQcm9kdWN0IElElEsDc3ViYXUu
+</properties>
+	</node_properties>
+	<session_state>
+		<window_groups />
+	</session_state>
+</scheme>

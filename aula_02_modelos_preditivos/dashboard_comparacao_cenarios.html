@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparação de Cenários</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-page:    #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-blue:    #2a78d6;
+    --series-orange:  #eb6834;
+    --status-good:     #0ca30c;
+    --status-warning:  #fab219;
+    --status-serious:  #ec835a;
+    --status-critical: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-page:    #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-blue:    #3987e5;
+      --series-orange:  #d95926;
+      --status-good:     #0ca30c;
+      --status-warning:  #fab219;
+      --status-serious:  #ec835a;
+      --status-critical: #d03b3b;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-page:    #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-blue:    #3987e5;
+    --series-orange:  #d95926;
+    --status-good:     #0ca30c;
+    --status-warning:  #fab219;
+    --status-serious:  #ec835a;
+    --status-critical: #d03b3b;
+  }
+
+  body { margin: 0; }
+  .viz-root {
+    background: var(--surface-page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 32px 20px 64px;
+    box-sizing: border-box;
+  }
+  .viz-root * { box-sizing: border-box; }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+
+  header.page-head { margin-bottom: 28px; }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-muted); margin: 0 0 8px;
+  }
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .sub { font-size: 14.5px; color: var(--text-secondary); line-height: 1.55; max-width: 780px; margin: 0; }
+  .sub code { background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+
+  section { margin-bottom: 32px; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  h2 {
+    font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--text-muted); margin: 0 0 16px;
+  }
+  h2 .h2-note { text-transform: none; letter-spacing: normal; font-weight: 400; color: var(--text-muted); }
+
+  /* KPI row: 4 scenarios */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .kpi {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .kpi.winner { border-color: var(--status-good); border-width: 2px; padding: 15px 17px; }
+  .kpi-label { font-size: 12px; color: var(--text-secondary); margin: 0 0 4px; min-height: 32px; }
+  .kpi-value { font-size: 26px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .kpi-sub { font-size: 11.5px; color: var(--text-muted); margin: 0 0 10px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; padding: 3px 9px 3px 7px; border-radius: 999px;
+  }
+  .badge.good { background: var(--status-good); color: #ffffff; }
+  .badge.warning { background: var(--status-warning); color: #0b0b0b; }
+  .badge.critical { background: var(--status-critical); color: #ffffff; }
+
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.data-table th, table.data-table td {
+    text-align: right; padding: 8px 9px; border-bottom: 1px solid var(--gridline);
+    font-variant-numeric: tabular-nums;
+  }
+  table.data-table th:first-child, table.data-table td:first-child { text-align: left; font-variant-numeric: normal; }
+  table.data-table thead th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; border-bottom: 1px solid var(--baseline); }
+  table.data-table tbody tr:last-child td { border-bottom: none; }
+  tr.row-best td { background: color-mix(in oklab, var(--status-good) 8%, transparent); font-weight: 600; }
+  tr.row-worst td { background: color-mix(in oklab, var(--status-critical) 6%, transparent); }
+  .table-scroll { overflow-x: auto; }
+
+  .bars-card svg { width: 100%; height: auto; display: block; }
+  .hint { font-size: 11.5px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+
+  .legend-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-secondary); margin-top: 12px; flex-wrap: wrap; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 820px) { .two-col { grid-template-columns: 1fr; } }
+
+  .callout {
+    border-radius: 12px; padding: 18px 20px; border: 1px solid var(--border);
+    background: color-mix(in oklab, var(--series-blue) 8%, var(--surface-1));
+  }
+  .callout h3 { font-size: 14px; font-weight: 700; margin: 0 0 10px; }
+  .callout ul { margin: 0; padding-left: 20px; }
+  .callout li { font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 6px; }
+  .callout li:last-child { margin-bottom: 0; }
+  .callout strong { color: var(--text-primary); }
+
+  footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--gridline); }
+  footer p { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0 0 6px; max-width: 780px; }
+  footer code { background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+</style>
+</head>
+<body>
+
+<div class="viz-root">
+  <div class="wrap">
+
+    <header class="page-head">
+      <p class="eyebrow">TE-292 · Aula 2 — Modelos preditivos · Seção 10 do notebook</p>
+      <h1>Comparação de cenários: outliers e novas features</h1>
+      <p class="sub">
+        Quatro formas de preparar os mesmos dados antes de treinar o <strong>mesmo modelo</strong>
+        (LightGBM, mesmos hiperparâmetros, mesmo <code>random_state</code>, mesma proporção
+        treino/teste). A única variável entre elas é a preparação: como tratar outliers de
+        <code>speed_rpm</code>/<code>torque_nm</code>, e se as colunas <code>wear_torq</code>
+        (= <code>torque_nm × tool_wear_min</code>) e <code>delta_k</code>
+        (= <code>process_temp_k − air_temp_k</code>) entram como atributos.
+      </p>
+    </header>
+
+    <section>
+      <h2>Recall por cenário <span class="h2-note">— limiar padrão (0,5)</span></h2>
+      <div class="kpi-row">
+        <div class="kpi">
+          <p class="kpi-label">Sem outliers (1,5×STD, remove)</p>
+          <p class="kpi-value">58,1%</p>
+          <p class="kpi-sub">8.020 linhas · 139/339 falhas restantes</p>
+          <span class="badge critical">⚠ pior cenário</span>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">Sem outliers (1,5×IQR, remove)</p>
+          <p class="kpi-value">67,5%</p>
+          <p class="kpi-sub">9.535 linhas · 263/339 falhas restantes</p>
+          <span class="badge warning">⚠ abaixo da meta</span>
+        </div>
+        <div class="kpi winner">
+          <p class="kpi-label">Com outliers (sem tratamento)</p>
+          <p class="kpi-value">76,6%</p>
+          <p class="kpi-sub">10.000 linhas · 339/339 falhas preservadas</p>
+          <span class="badge good">✓ maior recall isolado</span>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">IQR + wear_torq + delta_k</p>
+          <p class="kpi-value">72,5%</p>
+          <p class="kpi-sub">9.535 linhas · 263/339 falhas restantes</p>
+          <span class="badge warning">✓ recupera sinal perdido</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Tabela completa <span class="h2-note">— os quatro cenários, todas as métricas</span></h2>
+      <div class="card">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Cenário</th><th>Linhas</th><th>Falhas</th><th>Teste</th>
+                <th>TN</th><th>FP</th><th>FN</th><th>TP</th>
+                <th>Recall</th><th>Precisão</th><th>F2</th><th>Custo esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-worst">
+                <td>Sem outliers (1,5×STD, remove)</td><td>8.020</td><td>139/339</td><td>2.406</td>
+                <td>2.364</td><td>11</td><td>13</td><td>18</td>
+                <td>58,06%</td><td>62,07%</td><td>0,5882</td><td>US$ 13.110.000</td>
+              </tr>
+              <tr>
+                <td>Sem outliers (1,5×IQR, remove)</td><td>9.535</td><td>263/339</td><td>2.861</td>
+                <td>2.762</td><td>19</td><td>26</td><td>54</td>
+                <td>67,50%</td><td>73,97%</td><td>0,6870</td><td>US$ 26.190.000</td>
+              </tr>
+              <tr class="row-best">
+                <td>Com outliers (sem tratamento)</td><td>10.000</td><td>339/339</td><td>3.000</td>
+                <td>2.861</td><td>32</td><td>25</td><td>82</td>
+                <td>76,64%</td><td>71,93%</td><td>0,7565</td><td>US$ 25.320.000</td>
+              </tr>
+              <tr>
+                <td>IQR + wear_torq + delta_k</td><td>9.535</td><td>263/339</td><td>2.861</td>
+                <td>2.763</td><td>18</td><td>22</td><td>58</td>
+                <td>72,50%</td><td>76,32%</td><td>0,7323</td><td>US$ 22.180.000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hint">
+          Linha verde = melhor recall isolado. Linha vermelha = pior cenário (STD derruba 200 das
+          339 falhas reais — 59% — antes mesmo do treino começar). Custos: US$ 1.000.000 por falha
+          perdida (FN), US$ 10.000 por alarme falso (FP), conforme <code>CONFUSION_MATRIX_GUIDE.md</code>.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recall vs. custo esperado, lado a lado</h2>
+      <div class="two-col">
+        <div class="card bars-card">
+          <svg viewBox="0 0 420 280" role="img" aria-label="Gráfico de barras do recall por cenário">
+            <g stroke="var(--gridline)" stroke-width="1">
+              <line x1="50" y1="10" x2="50" y2="230"></line>
+              <line x1="50" y1="230" x2="400" y2="230"></line>
+            </g>
+            <g font-size="10" fill="var(--text-muted)" font-family="system-ui, sans-serif">
+              <text x="44" y="233" text-anchor="end">0%</text>
+              <text x="44" y="176" text-anchor="end">25%</text>
+              <text x="44" y="119" text-anchor="end">50%</text>
+              <text x="44" y="62"  text-anchor="end">75%</text>
+              <text x="44" y="13"  text-anchor="end">100%</text>
+            </g>
+            <g stroke="var(--gridline)" stroke-width="1">
+              <line x1="50" y1="176" x2="400" y2="176"></line>
+              <line x1="50" y1="119" x2="400" y2="119"></line>
+              <line x1="50" y1="62"  x2="400" y2="62"></line>
+            </g>
+            <line x1="50" y1="62.7" x2="400" y2="62.7" stroke="var(--status-critical)" stroke-width="1.4" stroke-dasharray="4 3"></line>
+            <text x="395" y="58" text-anchor="end" font-size="9.5" fill="var(--status-critical)">meta 95%</text>
+
+            <!-- scale: 220px = 100% -> 2.2 px/pt -->
+            <!-- STD: 58.06% -->
+            <rect x="65" y="102.3" width="46" height="127.7" rx="4" fill="var(--series-blue)"><title>Sem outliers (STD): 58,06%</title></rect>
+            <text x="88" y="96" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">58,1%</text>
+            <text x="88" y="248" text-anchor="middle" font-size="9.5" fill="var(--text-secondary)">STD</text>
+
+            <!-- IQR: 67.50% -->
+            <rect x="145" y="81.5" width="46" height="148.5" rx="4" fill="var(--series-blue)"><title>Sem outliers (IQR): 67,50%</title></rect>
+            <text x="168" y="75" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">67,5%</text>
+            <text x="168" y="248" text-anchor="middle" font-size="9.5" fill="var(--text-secondary)">IQR</text>
+
+            <!-- Raw: 76.64% -->
+            <rect x="225" y="61.6" width="46" height="168.4" rx="4" fill="var(--series-blue)"><title>Com outliers: 76,64%</title></rect>
+            <text x="248" y="55" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">76,6%</text>
+            <text x="248" y="248" text-anchor="middle" font-size="9.5" fill="var(--text-secondary)">Bruto</text>
+
+            <!-- IQR+features: 72.50% -->
+            <rect x="305" y="70.5" width="46" height="159.5" rx="4" fill="var(--series-blue)"><title>IQR + wear_torq + delta_k: 72,50%</title></rect>
+            <text x="328" y="64" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">72,5%</text>
+            <text x="328" y="248" text-anchor="middle" font-size="9.5" fill="var(--text-secondary)">IQR+feat</text>
+          </svg>
+          <p class="hint">Recall — quanto maior, melhor (meta: ≥95% para sistemas de segurança crítica).</p>
+        </div>
+
+        <div class="card bars-card">
+          <svg viewBox="0 0 420 280" role="img" aria-label="Gráfico de barras do custo esperado por cenário">
+            <g stroke="var(--gridline)" stroke-width="1">
+              <line x1="50" y1="10" x2="50" y2="230"></line>
+              <line x1="50" y1="230" x2="400" y2="230"></line>
+            </g>
+            <g font-size="10" fill="var(--text-muted)" font-family="system-ui, sans-serif">
+              <text x="44" y="233" text-anchor="end">0</text>
+              <text x="44" y="176" text-anchor="end">7M</text>
+              <text x="44" y="119" text-anchor="end">14M</text>
+              <text x="44" y="62"  text-anchor="end">21M</text>
+              <text x="44" y="13"  text-anchor="end">28M</text>
+            </g>
+            <g stroke="var(--gridline)" stroke-width="1">
+              <line x1="50" y1="176" x2="400" y2="176"></line>
+              <line x1="50" y1="119" x2="400" y2="119"></line>
+              <line x1="50" y1="62"  x2="400" y2="62"></line>
+            </g>
+
+            <!-- scale: 220px = 28M -> 7.857 px/M -->
+            <!-- STD: 13.11M -->
+            <rect x="65" y="127" width="46" height="103" rx="4" fill="var(--series-orange)"><title>Sem outliers (STD): US$ 13,11M</title></rect>
+            <text x="88" y="121" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--text-primary)">US$ 13,1M</text>
+            <text x="88" y="248" text-anchor="middle" font-size="9.5" fill="var(--text-secondary)">STD</text>
+
+            <!-- IQR: 26.19M -->
+            <rect x="145" y="24.2" width="46" height="205.8" rx="4" fill="var(--series-orange)"><title>Sem outliers (IQR): US$ 26,19M</title></rect>
+            <text x="168" y="18" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--text-primary)">US$ 26,2M</text>
+            <text x="168" y="248" text-anchor="middle" font-size="9.5" fill="var(--text-secondary)">IQR</text>
+
+            <!-- Raw: 25.32M -->
+            <rect x="225" y="30.4" width="46" height="199.6" rx="4" fill="var(--series-orange)"><title>Com outliers: US$ 25,32M</title></rect>
+            <text x="248" y="24" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--text-primary)">US$ 25,3M</text>
+            <text x="248" y="248" text-anchor="middle" font-size="9.5" fill="var(--text-secondary)">Bruto</text>
+
+            <!-- IQR+features: 22.18M (LOWEST -> highlight) -->
+            <rect x="305" y="55.6" width="46" height="174.4" rx="4" fill="var(--status-good)"><title>IQR + wear_torq + delta_k: US$ 22,18M (menor custo)</title></rect>
+            <text x="328" y="49" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--text-primary)">US$ 22,2M</text>
+            <text x="328" y="248" text-anchor="middle" font-size="9.5" fill="var(--text-secondary)">IQR+feat</text>
+          </svg>
+          <p class="hint">Custo esperado — quanto menor, melhor. O cenário com as novas features (verde) tem o menor custo dos quatro, mesmo partindo de um dataset com menos falhas.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Falhas perdidas vs. alarmes falsos, por cenário</h2>
+      <div class="card bars-card">
+        <svg viewBox="0 0 860 300" role="img" aria-label="Gráfico de barras comparando falsos negativos e falsos positivos nos quatro cenários">
+          <g stroke="var(--gridline)" stroke-width="1">
+            <line x1="60" y1="20" x2="60" y2="250"></line>
+            <line x1="60" y1="250" x2="820" y2="250"></line>
+          </g>
+          <g font-size="11" fill="var(--text-muted)" font-family="system-ui, sans-serif">
+            <text x="50" y="253" text-anchor="end">0</text>
+            <text x="50" y="192" text-anchor="end">20</text>
+            <text x="50" y="134" text-anchor="end">40</text>
+            <text x="50" y="76"  text-anchor="end">60</text>
+            <text x="50" y="25"  text-anchor="end">80</text>
+          </g>
+          <g stroke="var(--gridline)" stroke-width="1">
+            <line x1="60" y1="192" x2="820" y2="192"></line>
+            <line x1="60" y1="134" x2="820" y2="134"></line>
+            <line x1="60" y1="76"  x2="820" y2="76"></line>
+            <line x1="60" y1="25"  x2="820" y2="25"></line>
+          </g>
+
+          <!-- scale: 230px = 80 units -> 2.875 px/unit -->
+          <!-- Group 1: STD - FN 13, FP 11 -->
+          <g>
+            <rect x="90" y="212.6" width="26" height="37.4" rx="4" fill="var(--status-critical)"><title>STD · FN = 13</title></rect>
+            <text x="103" y="206" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">13</text>
+            <rect x="122" y="218.4" width="26" height="31.6" rx="4" fill="var(--status-warning)"><title>STD · FP = 11</title></rect>
+            <text x="135" y="212" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">11</text>
+            <text x="119" y="270" text-anchor="middle" font-size="12" fill="var(--text-secondary)">STD</text>
+          </g>
+
+          <!-- Group 2: IQR - FN 26, FP 19 -->
+          <g>
+            <rect x="280" y="175.3" width="26" height="74.7" rx="4" fill="var(--status-critical)"><title>IQR · FN = 26</title></rect>
+            <text x="293" y="169" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">26</text>
+            <rect x="312" y="195.4" width="26" height="54.6" rx="4" fill="var(--status-warning)"><title>IQR · FP = 19</title></rect>
+            <text x="325" y="189" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">19</text>
+            <text x="309" y="270" text-anchor="middle" font-size="12" fill="var(--text-secondary)">IQR</text>
+          </g>
+
+          <!-- Group 3: Bruto - FN 25, FP 32 -->
+          <g>
+            <rect x="470" y="178.1" width="26" height="71.9" rx="4" fill="var(--status-critical)"><title>Bruto · FN = 25</title></rect>
+            <text x="483" y="172" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">25</text>
+            <rect x="502" y="158" width="26" height="92" rx="4" fill="var(--status-warning)"><title>Bruto · FP = 32</title></rect>
+            <text x="515" y="152" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">32</text>
+            <text x="499" y="270" text-anchor="middle" font-size="12" fill="var(--text-secondary)">Bruto</text>
+          </g>
+
+          <!-- Group 4: IQR+feat - FN 22, FP 18 -->
+          <g>
+            <rect x="660" y="186.75" width="26" height="63.25" rx="4" fill="var(--status-critical)"><title>IQR+feat · FN = 22</title></rect>
+            <text x="673" y="181" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">22</text>
+            <rect x="692" y="198.25" width="26" height="51.75" rx="4" fill="var(--status-warning)"><title>IQR+feat · FP = 18</title></rect>
+            <text x="705" y="192" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text-primary)">18</text>
+            <text x="689" y="270" text-anchor="middle" font-size="12" fill="var(--text-secondary)">IQR+feat</text>
+          </g>
+        </svg>
+        <div class="legend-row">
+          <span class="legend-swatch" style="background: var(--status-critical);"></span> FN — falha perdida
+          <span style="width:14px;"></span>
+          <span class="legend-swatch" style="background: var(--status-warning);"></span> FP — alarme falso
+        </div>
+        <p class="hint">Note a escala menor que nos dashboards anteriores (0–80, não 0–800): nenhum destes quatro cenários usa o limiar de segurança calibrado — todos rodam no limiar padrão (0,5), por isso os volumes de FN/FP ficam próximos entre si.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Leitura dos resultados</h2>
+      <div class="callout">
+        <h3>O que os quatro cenários mostram, juntos</h3>
+        <ul>
+          <li><strong>STD é muito pior que IQR</strong> para remoção de outliers: derruba a base de 10.000 para 8.020 linhas, perdendo <strong>200 das 339 falhas reais (59%)</strong> — porque o desvio-padrão é inflado pelos próprios extremos que tenta delimitar, tornando o limite mais agressivo do que parece à primeira vista.</li>
+          <li><strong>Manter os dados brutos (com outliers) vence isoladamente</strong> em recall — nenhuma falha real é descartada antes do treino.</li>
+          <li><strong><code>wear_torq</code> e <code>delta_k</code> recuperam parte do sinal que a remoção por IQR apaga</strong>: partindo do mesmo dataset reduzido, essas duas colunas — construídas exatamente a partir das regras físicas de sobrecarga e dissipação de calor da aula 1 — elevam o recall de 67,5% para 72,5% <em>e</em> reduzem o custo esperado para o menor valor entre os quatro cenários (US$ 22,2M), abaixo até do cenário com dados brutos.</li>
+          <li><strong>Nenhum dos quatro cenários atinge a meta de recall ≥95%</strong> no limiar padrão — essa meta só é alcançável ajustando o limiar de decisão (seções anteriores do notebook), não pela escolha de tratamento de outliers isoladamente.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      <p>Modelo: LightGBM (<code>scale_pos_weight</code> balanceado), mesmos hiperparâmetros e split
+      (70/30, <code>random_state=0</code>, estratificado por <code>Type</code>) em todos os quatro
+      cenários. Custos: US$ 1.000.000 por falha perdida (FN), US$ 10.000 por alarme falso (FP)
+      (<code>CONFUSION_MATRIX_GUIDE.md</code>).</p>
+      <p>Gerado a partir da seção 10 de <code>aula_02_modelos_preditivos/modelo_preditivo.ipynb</code>
+      ("Comparação de estratégias — outliers e novas features"), executada do início ao fim sem erros.</p>
+    </footer>
+
+  </div>
+</div>
+
+</body>
+</html>

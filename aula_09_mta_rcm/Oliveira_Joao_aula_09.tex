@@ -1,0 +1,159 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage[margin=1.5cm,top=1.2cm,bottom=1.4cm]{geometry}
+\usepackage{booktabs,tabularx,array,makecell,amsmath,amssymb,microtype,titlesec,enumitem}
+\titleformat*{\section}{\normalsize\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries\itshape}
+\titlespacing*{\section}{0pt}{4pt}{1pt}
+\titlespacing*{\subsection}{0pt}{3pt}{0pt}
+\setlist{nosep,leftmargin=*}
+\setlength{\parindent}{0pt}\setlength{\parskip}{2pt}
+\renewcommand{\arraystretch}{1.0}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\pagestyle{plain}
+
+\begin{document}
+\textbf{Aluno:} João Paulo Gomes de Oliveira\\
+\textbf{Disciplina:} TE-292 Ciência de Dados em Operação e Manutenção de Aeronaves $|$ Aula 9: RCM e MTA\\
+Instituto Tecnológico de Aeronáutica (ITA)\\[2pt]
+{\small\textbf{Registro das execuções:} aplicativos \texttt{tool.aerologlab.ita.br/rcm} e \texttt{/mta}, em 14/10/2026 (BRT). RCM: 09:15:42--43; MTA: 09:15:44--09:16:08. Respostas brutas, com parâmetros e horário de cada execução, em \texttt{execucoes/*.json}. Expectativa do RCM gravada às 09:15:21, antes das execuções alternativas.}
+
+\section*{Parte 1 --- RCM: qual manutenção é necessária?}
+\subsection*{1a. Contexto operacional e funções}
+\textbf{Contexto:} aeronave em missões diárias, com janela de manutenção de 300\,min entre missões. O conjunto roda--pneu--monitoramento atua em pouso, táxi e decolagem. A pressão é indicada à tripulação, e a proteção de reserva só atua quando demandada. Funções sem nomear equipamentos e com padrão mensurável [1, §5.5].
+\textbf{F1:} \emph{sustentar} a aeronave no solo em pouso, táxi e decolagem, até a carga e a velocidade máximas de projeto, mantendo a pressão de inflação dentro da faixa do AMM. \emph{Dados necessários:} faixa de pressão, cargas e velocidades limite, e critério de desgaste do AMM/fabricante.
+\textbf{F2:} \emph{informar} à tripulação a pressão de cada pneu, com a exatidão especificada, e alarmar quando a proteção de reserva for demandada. \emph{Dados necessários:} exatidão do sensor e tempo máximo até o alarme.
+
+\subsection*{1b. Análise por modo de falha}
+
+{\small\setlength{\tabcolsep}{2.5pt}
+\begin{tabularx}{\linewidth}{@{}p{0.35cm}YYYYYY@{}}
+\toprule
+& Falha funcional associada & Efeitos e evidência de detecção & Consequências (falha oculta quando aplicável) & Tarefa/política proposta & Por que é aplicável e eficaz? & Ação se não houver tarefa adequada\\
+\midrule
+A & F1 perdida: o pneu deixa de sustentar a carga no pouso. \emph{Mecanismo:} desgaste progressivo. \emph{Falha potencial (P):} banda no critério do AMM & Antes da perda: desgaste visível na inspeção. Após: perda de pressão ou estouro no pouso & \textbf{Segurança}, evidente (árvore de decisão: classe A) & Inspeção sob condição; substituir ao atingir o critério do AMM & Aplicável porque detecta o início da falha. Eficaz \emph{se} o intervalo P-F for maior que o intervalo de inspeção mais o tempo de resposta (\emph{a demonstrar}) & Modificação de projeto ou operação: restringir a operação, inspecionar a cada missão. Não operar até a falha [1, §5.8.1]\\
+B & F2 perdida: a pressão deixa de ser indicada. \emph{Mecanismo:} falha abrupta do sensor & A tripulação recebe o aviso da perda; não há precursor & \textbf{Evidente}. Operacional se os meios alternativos bastarem; se não, segurança (\emph{a avaliar}) & Operar até a falha, com reparo e verificação alternativa da pressão antes da missão & Taxa constante: não há tarefa periódica aplicável [1, §5.8.1]. O aviso permite agir a tempo & Se os meios alternativos não bastarem: redundância (2º sensor) ou verificação manual obrigatória\\
+C & F2 (alarme) não atua quando a proteção é demandada. \emph{Mecanismo:} falha do circuito & Nenhum efeito em operação normal; só aparece no teste ou na demanda & \textbf{Oculta}, segurança por falha múltipla (alarme + demanda), classe D/A [1, §5.6.4] & Busca de falha: teste funcional periódico & Aplicável porque revela a falha oculta. O intervalo é dimensionado pela disponibilidade exigida & Teste automático (BIT), alarme redundante ou monitoramento contínuo\\
+\bottomrule
+\end{tabularx}}
+
+\textbf{Ainda falta demonstrar:} em A, a detectabilidade e o intervalo P-F; em B, se os meios alternativos bastam em todas as fases do voo; em C, a taxa de falha do circuito e a frequência de demanda.
+
+\subsection*{1c. Respostas curtas}
+\textbf{Sensor.} Com taxa constante, o risco de falha não depende da idade: o sensor novo tem o mesmo risco do antigo, e a troca periódica não reduz a probabilidade de falha [1, §5.8.1]. Só consome recursos e pode introduzir falhas de instalação.
+\textbf{Pneu.} É preciso mostrar que o desgaste é \emph{detectável} com o método e o critério do AMM, conhecer o intervalo P-F e sua dispersão a partir do histórico de condição, e garantir que o intervalo de inspeção somado ao tempo de resposta caiba no P-F. O tempo de resposta (logística e execução) é o que a Parte 2 estima.
+\textbf{Alarme.} O teste \emph{revela} uma falha já existente; não a evita. A tarefa se justifica pela disponibilidade (reduzir o tempo em falha oculta), não pela prevenção. Por isso o intervalo vem da taxa de falha oculta e do risco aceitável de falha múltipla, não do envelhecimento.
+
+\subsection*{2. Intervalo econômico --- Default Example}
+\textbf{Parâmetros fixos nas três execuções:} MTBF = 15\,000\,h, LIM = 600\,h, horizonte $H$ = 8\,000\,h, passo de 100\,h, modelo exponencial (Weibull desativado). Só um custo muda por execução.
+\textbf{Funções documentadas no manual [2]:} $\mathrm{PMC}(t)=\frac{H}{t}\,R(t)\,\mathrm{PMC}$; $\mathrm{CMC}(t)=[1-R(t)]\,\mathrm{CMC}$; $\mathrm{Total}=\mathrm{PMC}(t)+\mathrm{CMC}(t)$, com $R(t)=e^{-t/\mathrm{MTBF}}$.
+\emph{Divergência:} o enunciado escreve o termo preventivo sem o fator $R(t)$; o manual o inclui, e a saída do aplicativo reproduz o manual.
+O termo preventivo \emph{empurra a busca para intervalos longos}, porque o número de intervenções $H/t$ cai com $t$. O termo corretivo \emph{empurra para intervalos curtos}, mas entra uma única vez e é limitado por $[1-R(t)]\le1$. Por essa \textbf{assimetria}, o total cai quase como $1/t$ até o termo corretivo pesar.
+
+\textbf{Expectativa (registrada antes das execuções alternativas):} \emph{dobrar o CMC deve encurtar o intervalo ótimo, porque dobra o peso do único termo que cresce com $t$, com mínimo perto de 5\,500\,h pela condição $H\,\mathrm{PMC}(1/t^2+\lambda/t)=\lambda\,\mathrm{CMC}$; dobrar o PMC deve alongá-lo, ou mantê-lo na fronteira de 8\,000\,h, porque reforça o termo que só diminui com $t$.}
+
+
+{\small\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}Yrrrrrrr@{}}
+\toprule
+Execução & PMC (\$) & CMC (\$) & \makecell[r]{Intervalo\\ótimo (h)} & \makecell[r]{R no\\ótimo (\%)} & \makecell[r]{Custo total\\no ótimo (\$)} & \makecell[r]{Custo total no\\LIM 600\,h (\$)} & \makecell[r]{Economia anual (\$/ano)\\premissa: 1\,000\,h/ano}\\
+\midrule
+Padrão & 315 & 847 & 8\,000$^{*}$ & 58,67 & 534,90 & 4\,068,53 & 441,70\\
+Apenas CMC duplicado & 315 & 1\,694 & 5\,500 & 69,30 & 837,53 & 4\,101,74 & 408,03\\
+Apenas PMC duplicado & 630 & 847 & 8\,000$^{*}$ & 58,67 & 719,70 & 8\,103,84 & 923,02\\
+\bottomrule
+\multicolumn{8}{@{}l}{\footnotesize $^{*}$ fronteira superior da busca (horizonte de 8\,000\,h): não é ótimo demonstrado.}
+\end{tabularx}}
+
+\textbf{Interpretação:} a expectativa foi confirmada. No padrão e com PMC dobrado, o total \textbf{decresce em toda a faixa}, e o ótimo para na fronteira. Isso só mostra que o mínimo não está na região pesquisada; não demonstra um ótimo em 8\,000\,h nem além. Com CMC dobrado, a condição de mínimo passa a ter solução dentro da faixa, em 5\,500\,h. Recalculando as fórmulas documentadas, obtive os mesmos números.
+\textbf{Confronto com o manual:} o Exemplo 1 relata 550\,h e 96,4\% [2]. Pelas fórmulas documentadas, porém, o total em 550\,h é \$4\,447, maior que os \$535 em 8\,000\,h, e 96,4\% é apenas $R(550)$. \textbf{Vale a saída do aplicativo}: o 550\,h não é reproduzível com o modelo documentado.
+\textbf{Limite do modelo:} com taxa constante, a substituição preventiva não reduz o risco (falta de memória), e o modelo clássico de substituição por idade, $[\mathrm{PMC}\,R+\mathrm{CMC}(1-R)]/\!\int_0^t\!R$, não tem ótimo finito. O ótimo do aplicativo nasce da assimetria: o preventivo é cobrado $H/t$ vezes, e o corretivo, no máximo uma vez.
+
+\textbf{Recomendação:} dentro das premissas do aplicativo, recomendo \textbf{600\,h, o LIM}. Nas três execuções o ótimo fica acima do LIM, e o LIM é teto regulatório: a decisão é cumprir 600\,h. Um pedido de extensão só caberia com evidência que o aplicativo não fornece (dados de remoção, ajuste de Weibull com $\beta$, aprovação do fabricante e da autoridade).
+A economia anual vale para 1\,000\,h/ano. Para uma utilização $U$, ela escala por $U/1000$; o intervalo recomendado não muda, porque o modelo trabalha em horas de voo.
+\textbf{Um intervalo mais barato não demonstra que a tarefa controla as consequências de falha.} O modelo não representa a consequência, a aplicabilidade da tarefa ao modo de falha nem o intervalo P-F.
+
+\section*{Parte 2 --- MTA: como executar e com qual prazo?}
+\subsection*{3. Ficha de análise da tarefa --- substituição do pneu (modo A)}
+\textbf{Gatilho:} desgaste ou dano no critério de substituição do AMM/CMM, constatado na inspeção sob condição. \textbf{Critério de conclusão:} conjunto instalado com torque e pressão conforme o AMM, inspeção independente assinada e registro no diário técnico.
+\textbf{Fontes:} as durações são os MTTR das subtarefas do cenário \emph{Aircraft Tire Replacement} [3], agrupadas por mim. Os itens marcados com † são estimativas minhas: predecessoras, paralelismo e quantidade de pessoal.
+
+{\small\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}p{3.3cm}p{1.35cm}rp{2.0cm}YYY@{}}
+\toprule
+Subtarefa & \makecell[l]{Predeces-\\sora(s)†} & \makecell[r]{Duração\\base (min)} & Quantidade e qualificação do pessoal† & Ferramentas/ equipamentos & Peças/ consumíveis & Condição de segurança e critério de conclusão\\
+\midrule
+S1 Preparação e segurança & --- & 20 & 2 mecânicos & calços, sinalização & --- & Área isolada; despressurização conforme o AMM\\
+S2 Obter e verificar o pneu novo & nenhuma (em paralelo) & 15 & 1 almoxarife & --- & pneu (item COTS) & P/N e estado conferidos com o IPC\\
+S3 Elevar a aeronave e remover a roda & S1 & 35 & 2 mecânicos & macacos & --- & Aeronave estável sobre macacos\\
+S4 Desmontar o pneu e inspecionar a roda & S3 & 25+30 & 1 mecânico & ferramenta de destalonar & --- & Roda dentro dos critérios do CMM\\
+S5 Montar o pneu e balancear & S2, S4 & 30+25 & 1 mecânico & balanceadora (equip. especial) & conforme IPC & Balanceamento na tolerância do CMM\\
+S6 Instalar a roda e baixar os macacos & S5 & 35 & 2 mecânicos & macacos, torquímetro & conforme IPC & Torque e pressão conforme o AMM\\
+S7 Inspeção final, registro e liberação & S6 & 20 & 1 inspetor & --- & --- & Inspeção independente registrada\\
+\bottomrule
+\end{tabularx}}
+
+\textbf{Tempo decorrido base:} caminho crítico S1$\to$S3$\to$S4$\to$S5$\to$S6$\to$S7 $=220$\,min. S2 corre em paralelo e só precisa terminar antes de S5. A soma sequencial seria 235\,min, o MTTR do cenário.
+\textbf{Esforço:} $\sum(\text{duração}\times\text{pessoas})=40+15+70+55+55+70+20=325$\,min $\approx$ \textbf{5,4 homem-hora}.
+Duas pessoas trabalhando juntas por uma hora somam \emph{uma} hora decorrida (limita a janela) e \emph{duas} homem-hora (dimensionam efetivo e custo).
+Os 220\,min são \textbf{execução ativa}. A \textbf{espera logística} (por pneu, balanceadora ou inspetor) não está incluída. O simulador soma as nove durações sem precedências; por isso, 220\,min (ficha) e 235\,min (cenário) não precisam coincidir.
+
+\subsection*{4. Distribuição da duração --- 5\,000 simulações (Balanced), 3 execuções por cenário e alvo}
+\textbf{Construção [3]:} cada subtarefa é sorteada de $N(\mathrm{MTTR},\,0{,}1\,\mathrm{MTTR})$, e os atrasos entram como acréscimos discretos e positivos (+15, +30 ou +60\,min).
+A soma das normais independentes tem desvio $0{,}1\sqrt{\sum\mathrm{MTTR}_i^2}=8{,}1$\,min (CV de \textbf{3,4\%}, menor que 10\% porque os desvios das subtarefas se compensam em parte).
+Os atrasos deslocam a média e criam uma \textbf{cauda à direita} com degraus: a variância base é só \textbf{2,7\%} da total no pneu (1,3\% na aviônica), daí o CV observado de 17\% e 23\%.
+
+{\small\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{}Y c c c rrr r r l@{}}
+\toprule
+Cenário & \makecell{Alvo\\(min)} & \makecell{MTTR det.\\(min)} & Exec. & \makecell[r]{Média\\(min)} & \makecell[r]{P90\\(min)} & \makecell[r]{P95\\(min)} & \makecell[r]{CV\\(\%)} & \makecell[r]{Prob. de\\concluir no alvo} & \makecell[l]{Nível de risco\\informado}\\
+\midrule
+Pneu & 300 & 235 & 1 & 297,8 & 366,3 & 390,4 & 16,7 & 0,565 & HIGH\\
+ &  &  & 2 & 297,4 & 364,6 & 389,1 & 16,7 & 0,564 & HIGH\\
+ &  &  & 3 & 297,8 & 368,0 & 388,6 & 16,9 & 0,564 & HIGH\\
+\midrule
+Aviônica & 200 & 170 & 1 & 235,4 & 307,2 & 336,5 & 22,9 & 0,321 & HIGH\\
+ &  &  & 2 & 235,3 & 306,9 & 333,5 & 22,8 & 0,326 & HIGH\\
+ &  &  & 3 & 236,3 & 308,6 & 336,7 & 23,0 & 0,320 & HIGH\\
+\midrule
+Pneu: alvo = MTTR & 235 & 235 & 1 & 298,6 & 366,5 & 389,9 & 16,4 & 0,061 & HIGH\\
+ &  &  & 2 & 297,7 & 366,1 & 390,2 & 16,7 & 0,067 & HIGH\\
+ &  &  & 3 & 297,9 & 366,8 & 388,7 & 16,6 & 0,070 & HIGH\\
+\midrule
+Pneu: alvo $\approx$ P90 & 366 & 235 & 1 & 297,8 & 365,1 & 390,6 & 16,5 & 0,902 & MODERATE\\
+ &  &  & 2 & 298,7 & 367,5 & 393,2 & 17,2 & 0,895 & MODERATE\\
+ &  &  & 3 & 297,9 & 365,2 & 389,3 & 16,7 & 0,902 & MODERATE\\
+\bottomrule
+\end{tabularx}}
+
+{\footnotesize Cenários do aplicativo: \emph{Aircraft Tire Replacement} (ATA 32) e \emph{Avionics Post-Maintenance Check} (ATA 34; a documentação o chama de \emph{Avionics System Operational Check}). 5\,000 simulações por execução, sem semente; o P90 vem da resposta do aplicativo.}
+\textbf{1.} O MTTR determinístico (235\,min) é a duração \emph{sem atrasos} e só é cumprido em 6--7\% das simulações. A média ($\approx$298\,min) é o valor \emph{esperado} (capacidade e custo). Um percentil responde a \emph{qual prazo atinge certa confiança}: o P90 é $\approx$366\,min.
+\textbf{2.} Média e P90 não mudam com o alvo: a média varia entre 297,4 e 298,7\,min nos três alvos, a mesma ordem da amplitude dentro de cada alvo ($\le$1\,min). O alvo não altera a distribuição. Já a probabilidade de cumprimento passa de 0,06 para 0,56 e 0,90, muito acima da amplitude entre execuções do mesmo alvo ($\le$0,009). É a mesma distribuição lida em pontos diferentes.
+\textbf{3.} Para 90\% de probabilidade de cumprimento, adoto o prazo de \textbf{370\,min} (o maior P90 observado foi 368\,min). A janela de 300\,min \textbf{não atende}: cumpre-se em $\approx$56\%. Com 95\%, o prazo iria a $\approx$395\,min (maior P95: 393\,min). Esse prazo é estimativa de programação, \emph{não} critério técnico de execução ou liberação.
+
+\subsection*{5. Recursos e atrasos (pneu)}
+\textbf{Contribuição esperada por ocorrência} ($p\times$acréscimo) [3]: balanceadora (\texttt{DELAY3}) $0{,}20\times60=\mathbf{12}$\,min; pneu (\texttt{DELAY2}) $0{,}25\times30=\mathbf{7{,}5}$\,min; inspetor (\texttt{DELAY1}) $0{,}20\times15=\mathbf{3}$\,min.
+A balanceadora é a primeira a investigar: maior contribuição e maior degrau (+60\,min), que pesa no P90; mas a ordenação depende também de quantas etapas cada categoria afeta.
+\textbf{Limitação:} os três riscos somam 22,5\,min, mas a média simulada excede o MTTR em $\approx$63\,min. Há, portanto, probabilidades de atraso por subtarefa que a documentação não declara. Um atraso de pessoal (+15) presente em várias etapas pode superar os outros, e a contribuição à média pode diferir da contribuição ao risco de passar do prazo. Sem a tabela \texttt{DELAY1}--\texttt{DELAY3} por subtarefa, a ordenação é de primeira ordem e não conclusiva. A coluna \texttt{\% of Total Variance} descreve só a parte base (2,7\% da variância) e não indica qual recurso domina o atraso.
+\textbf{Ação:} reservar a balanceadora ou manter uma roda já montada e balanceada em estoque (tira S4 e S5 do caminho crítico), reduzindo a espera por equipamento especial e, no segundo caso, pela peça.
+\textbf{Verificação:} comparar a probabilidade de concluir em 300\,min antes e depois da ação, com o mesmo alvo. O aplicativo não permite alterar os recursos de um cenário, então esse efeito \textbf{não foi simulado}. Em campo, mede-se pelas esperas registradas nas ordens de serviço.
+
+\section*{Parte 3 --- Decisão integrada}
+O modo A (desgaste, consequência de segurança) justifica a substituição sob condição, disparada pelo critério de desgaste do AMM. A ficha MTA soma 220\,min de execução ativa e caberia em 300\,min se não houvesse espera. No cenário simulado, porém, a espera logística eleva a média a $\approx$298\,min: a janela de 300\,min é cumprida em $\approx$56\% das vezes, e 90\% exigiriam $\approx$370\,min.
+\textbf{Resposta: não.} Com os recursos do cenário, a tarefa não cabe na janela de 300\,min com 90\% de probabilidade.
+\textbf{Limite da evidência:} o simulador usa entradas próprias, e não a ficha; indica a ordem de grandeza da espera, não o tempo da nossa execução.
+\textbf{Mudanças propostas:} roda montada e balanceada de reserva, inspetor escalado para o fim da janela, ou janela de pelo menos 370\,min (pernoite).
+Atingido o critério de desgaste, a aeronave não voa até a substituição: a programação se ajusta à segurança, não o contrário.
+
+\textbf{O que uma CAMO não deveria extrair:} que o componente hidráulico possa ir a 8\,000\,h, ou que 300\,min bastem para o pneu. O ótimo está na fronteira de um modelo simplificado, o LIM é teto regulatório, e as saídas dos aplicativos não são programa de manutenção aprovado nem procedimento de execução.
+\textbf{Primeiro dado a buscar:} as \textbf{probabilidades e durações reais de espera por recurso, subtarefa a subtarefa}. Elas respondem por $\approx$97\% da variância simulada e pela diferença entre 235 e 298\,min, e decidem se a janela basta. Depois, o intervalo P-F observado do pneu, que valida a antecedência do gatilho.
+
+\vspace{3pt}\textbf{Referências}\par
+[1] Smith, A. M.; Hinchcliffe, G. R. \emph{RCM---Gateway to World Class Maintenance}. Elsevier, 2004, §4.4, §5.5--5.8.\par
+[2] AeroLogLab/ITA. \emph{RCM Optimizer --- User Manual}, v3.0. \texttt{tool.aerologlab.ita.br/rcm/manual}. Acesso em 14/10/2026.\par
+[3] AeroLogLab/ITA. \emph{MTA Scenarios Summary}. \texttt{tool.aerologlab.ita.br/mta/summary}. Acesso em 14/10/2026.\par
+[4] Mesquita, A. C. P. TE-292, Aula 9: \emph{Da seleção da manutenção à execução da tarefa: RCM e MTA} (enunciado).
+\end{document}

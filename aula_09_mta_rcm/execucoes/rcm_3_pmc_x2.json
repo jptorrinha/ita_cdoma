@@ -1,0 +1,30 @@
+{
+  "id": "rcm_3_pmc_x2",
+  "horario": "2026-10-14T09:15:43-03:00",
+  "parametros": {
+    "pmc": 630,
+    "cmc": 847,
+    "lambda": 6.666666666666667e-05,
+    "lim": 600,
+    "time_horizon": 8000,
+    "step": 100,
+    "distribution_type": "exponential",
+    "mtbf": 15000
+  },
+  "resposta": {
+    "result": {
+      "annual_savings": 923.02,
+      "best_r": 0.58665,
+      "best_t": 8000,
+      "lim_cmc": 33.21,
+      "lim_pmc": 8070.63,
+      "lim_r": 0.96079,
+      "lim_total_cost": 8103.84,
+      "optimal_cmc": 350.11,
+      "optimal_pmc": 369.59,
+      "optimal_total_cost": 719.7,
+      "savings_percent": 11.39
+    },
+    "success": true
+  }
+}

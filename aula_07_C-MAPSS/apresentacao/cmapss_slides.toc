@@ -1,0 +1,6 @@
+\babel@toc {brazil}{}\relax 
+\beamer@sectionintoc {1}{O conjunto de dados C-MAPSS}{3}{0}{1}
+\beamer@sectionintoc {2}{O problema de decisão}{20}{0}{2}
+\beamer@sectionintoc {3}{Abordagem}{31}{0}{3}
+\beamer@sectionintoc {4}{Resultados preliminares}{41}{0}{4}
+\beamer@sectionintoc {5}{Limitações e próximos passos}{48}{0}{5}

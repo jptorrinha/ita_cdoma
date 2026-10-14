@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(/home/celio/.local/share/pipx/venvs/jupyterlab/bin/python3 -c ' *)",
+      "Bash(pip3 install *)",
+      "Bash(python3 -m pip install --quiet --user pandas)",
+      "Bash(python3 -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(/opt/homebrew/bin/python3 -c \"import pandas, numpy, matplotlib, seaborn, sklearn, scipy; print\\('ok'\\)\")",
+      "Bash(/opt/homebrew/bin/python3 -m venv .venv)",
+      "Bash(./.venv/bin/pip install *)",
+      "Bash(./.venv/bin/jupyter lab *)",
+      "Bash(disown)",
+      "Read(//tmp/**)",
+      "Bash(./.venv/bin/python3 -c ' *)"
+    ]
+  }
+}
