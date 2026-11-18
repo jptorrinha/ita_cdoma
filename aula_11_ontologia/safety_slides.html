@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monte Carlo aplicado à decisão de inspeção — método de Igor Neves</title>
+<style>
+:root{
+  --bg:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#8a8984; --line:#e4e3df; --soft:#f3f2ef;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s7:#6250d6;
+  --fab:var(--s1); --op:var(--s2);
+  --serif:Georgia,"Times New Roman",serif; --sans:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#1d1d1b;overflow:hidden;font-family:var(--sans);color:var(--ink)}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;background:var(--bg);box-shadow:0 10px 40px rgba(0,0,0,.4)}
+.slide{position:absolute;inset:0;padding:52px 72px 64px;display:none;flex-direction:column}
+.slide.active{display:flex}
+.kicker{font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--s1);font-weight:600;margin-bottom:10px}
+h1{font-family:var(--serif);font-weight:500;font-size:58px;line-height:1.08;margin:0 0 18px}
+h2{font-family:var(--serif);font-weight:500;font-size:40px;line-height:1.15;margin:0 0 26px}
+h3{font-size:22px;margin:0 0 10px;font-weight:600}
+p,li{font-size:24px;line-height:1.45;margin:0 0 12px}
+ul,ol{margin:0;padding-left:28px}
+small,.note{font-size:17px;color:var(--ink2)}
+.lead{font-size:28px;color:var(--ink2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 24px}
+.card p,.card li{font-size:21px}
+.card.fab{border-top:5px solid var(--fab)} .card.op{border-top:5px solid var(--op)}
+.card.acc{border-top:5px solid var(--s3)} .card.vio{border-top:5px solid var(--s7)}
+.big{font-family:var(--serif);font-size:84px;line-height:1;margin:8px 0}
+.q{border-left:6px solid var(--s2);background:#fff6f1;padding:16px 22px;border-radius:0 10px 10px 0;font-size:26px;margin-top:auto}
+.ok{border-left:6px solid var(--s3);background:#effaf5;padding:16px 22px;border-radius:0 10px 10px 0;font-size:24px;margin-top:auto}
+.center{align-items:center;justify-content:center;text-align:center}
+table{border-collapse:collapse;width:100%;font-size:22px}
+th,td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.tot td{font-weight:700;border-top:2px solid var(--ink)}
+code{font-family:Consolas,monospace;background:var(--soft);padding:1px 6px;border-radius:4px;font-size:.92em}
+.tag{display:inline-block;font-size:15px;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--soft);color:var(--ink2);margin-right:6px}
+.chain{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;margin:18px 0}
+.node{background:#fff;border:2px solid var(--ink);border-radius:10px;padding:14px 18px;font-size:22px;font-weight:600;text-align:center;min-width:130px}
+.node.res{border-color:var(--s3)}
+.arrow{display:flex;flex-direction:column;align-items:center;font-size:15px;color:var(--ink2);min-width:96px}
+.arrow span{white-space:nowrap}
+.arrow i{font-style:normal;font-size:22px;line-height:1;color:var(--ink2)}
+.layer{display:grid;grid-template-columns:70px 1fr;gap:18px;align-items:start;margin-bottom:18px}
+.layer b.num{font-family:var(--serif);font-size:52px;line-height:1;color:var(--s1)}
+.footer{position:absolute;left:72px;right:72px;bottom:22px;display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.frag{visibility:hidden;opacity:0;transition:opacity .25s}
+.frag.on{visibility:visible;opacity:1}
+aside.notes{display:none}
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:32vh;overflow:auto;background:#111;color:#eee;font:16px/1.5 var(--sans);padding:14px 22px;display:none;z-index:9}
+body.shownotes #notes{display:block}
+#progress{position:fixed;left:0;top:0;height:4px;background:var(--s1);z-index:8;transition:width .2s}
+/* charts */
+.hbar{display:grid;grid-template-columns:340px 1fr;gap:10px 18px;align-items:center}
+.hbar .lab{font-size:20px;text-align:right;color:var(--ink)}
+.hbar .lab small{display:block;font-size:15px}
+.track{position:relative;height:38px}
+.bar{height:100%;border-radius:0 4px 4px 0;position:relative;cursor:default}
+.bar .v{position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);font-size:20px;font-weight:600;color:var(--ink);white-space:nowrap}
+.bar.hyp{background:repeating-linear-gradient(45deg,var(--op) 0 6px,#fbd3c2 6px 12px)}
+.legend{display:flex;gap:22px;font-size:17px;color:var(--ink2);margin:6px 0 14px}
+.legend span::before{content:"";display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:7px;vertical-align:-2px;background:var(--c)}
+.stack{display:flex;gap:2px;height:64px;width:100%;margin:12px 0 8px}
+.stack div{height:100%;cursor:default}
+.stack div:first-child{border-radius:4px 0 0 4px}.stack div:last-child{border-radius:0 4px 4px 0}
+.axis{display:flex;justify-content:space-between;font-size:15px;color:var(--muted);border-top:1px solid var(--line);padding-top:4px}
+.vbars{display:flex;align-items:flex-end;gap:60px;height:330px;padding:0 40px;border-bottom:1px solid var(--ink2)}
+.vbars .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.vbars .b{width:110px;background:var(--s1);border-radius:4px 4px 0 0;cursor:default}
+.vbars .val{font-size:24px;font-weight:600;margin-bottom:6px}
+.vlabels{display:flex;gap:60px;padding:8px 40px 0}
+.vlabels div{flex:1;text-align:center;font-size:19px}
+#tip{position:fixed;pointer-events:none;background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:0 4px 16px rgba(0,0,0,.15);border-radius:8px;padding:8px 12px;font-size:15px;display:none;z-index:10;max-width:280px}
+.formula{font-family:var(--serif);font-size:34px;text-align:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin:6px 0 22px}
+.box2{display:grid;grid-template-columns:1fr 1fr;gap:0;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
+.box2>div{padding:22px 26px}
+.box2>div+div{border-left:2px dashed var(--ink2);background:#fff7f2}
+@media print{ .slide{display:flex!important;position:relative;page-break-after:always;height:720px} #stage{transform:none!important;position:static;box-shadow:none} html,body{overflow:visible;background:#fff} .frag{visibility:visible;opacity:1} #progress,#notes{display:none!important}}
+
+.stair{display:flex;align-items:flex-end;gap:10px;height:330px;margin-top:6px}
+.stair div{flex:1;background:#fff;border:2px solid var(--ink);border-radius:10px 10px 0 0;padding:12px 12px;display:flex;flex-direction:column;justify-content:flex-start}
+.stair b{font-size:20px} .stair span{font-size:16px;color:var(--ink2);margin-top:6px;line-height:1.35}
+.stair .val{border-color:var(--s2);border-style:dashed}
+.dot{position:relative;height:90px;margin:6px 0 4px;border-bottom:1px solid var(--line)}
+.dot .wh{position:absolute;top:38px;height:2px;background:var(--s1)}
+.dot .wh::before,.dot .wh::after{content:"";position:absolute;top:-8px;width:2px;height:18px;background:var(--s1)}
+.dot .wh::before{left:0}.dot .wh::after{right:0}
+.dot .pt{position:absolute;top:30px;width:18px;height:18px;border-radius:50%;margin-left:-9px;border:2px solid var(--bg)}
+.dot .lbl{position:absolute;top:58px;font-size:15px;color:var(--ink2);transform:translateX(-50%);white-space:nowrap}
+.dot .lblt{position:absolute;top:2px;font-size:15px;color:var(--ink);font-weight:600;transform:translateX(-50%);white-space:nowrap}
+.grid6{display:grid;grid-template-columns:repeat(3,96px);gap:4px}
+.cell{height:56px;border-radius:6px;display:flex;flex-direction:column;line-height:1.1;align-items:center;justify-content:center;font-size:20px;font-weight:600;background:#fff;border:2px solid var(--line)}
+.cell small{display:block;font-size:12px;font-weight:400;color:var(--ink2)}
+.cell.bad{border-color:var(--s2);background:#fff3ec}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="stage">
+<section class="slide center"><div class="kicker">TE-292 · Aula 11 · Segurança de voo</div><h1>Monte Carlo para decidir<br>quando inspecionar</h1><p class="lead">Aplicar o método de avaliação de risco apresentado por Igor Neves Marques da Silva</p><p class="note" style="margin-top:22px">Prof. Antonio Celio Pereira de Mesquita · AeroLogLab — ITA</p><aside class="notes">O Monte Carlo é a técnica de simulação; o estudo de Igor organiza sua aplicação à avaliação de risco nos casos de disco e estrutura. A finalidade da aula é aprender a construir, executar e interpretar cenários de inspeção. Teclas: →/←, N para notas e F para tela cheia.</aside></section>
+<section class="slide"><div class="kicker">A decisão que queremos apoiar</div><h2>Qual plano de inspeção escolher?</h2><div class="grid2"><div class="card fab"><h3>Plano atual</h3><p>Quando inspecionar?<br>Qual a capacidade de detectar ou prevenir a falha?</p></div><div class="card op"><h3>Plano alternativo</h3><p>Inspecionar mais cedo ou com maior frequência reduz o risco estimado?</p></div></div><div class="q">Simular os dois planos sob as mesmas hipóteses e comparar risco e incerteza.</div><aside class="notes">Peça uma decisão concreta: manter ou modificar o programa de inspeção. O modelo estima consequências dos planos; não escolhe automaticamente a alternativa de menor custo. Custo e viabilidade precisam de informação adicional.</aside></section>
+<section class="slide"><div class="kicker">Estudo de referência · autoria</div><h2>Do estudo de Igor à sua aplicação</h2><p><b>Igor Neves Marques da Silva</b><br><i>Monte Carlo Simulation Application on Aviation Safety Risk Assessment</i><br><span class="note">Dissertação de mestrado · ITA · 2026</span></p><div class="grid2"><div class="card fab"><h3>Dois casos</h3><p>Disco de turbina: vida e intervenções.<br>Estrutura: crescimento de trinca e detecção.</p></div><div class="card op"><h3>Ao final da aula</h3><p>Definir um cenário, executar o modelo e justificar uma conclusão sobre o plano de inspeção.</p></div></div><aside class="notes">Atribuição do estudo e de sua aplicação, não da criação da técnica geral de Monte Carlo. Usaremos as implementações R dos casos e os notebooks Python da aula. Os parâmetros utilizados nos materiais são ilustrativos.</aside></section>
+<section class="slide"><div class="kicker">O roteiro que será reutilizado</div><h2>Seis etapas para aplicar o método</h2><table><tr><th>Etapa</th><th>Pergunta a responder</th></tr><tr><td>1 · Definir a decisão</td><td>Qual evento, frota e período serão avaliados?</td></tr><tr><td>2 · Representar o sistema</td><td>Como surgem as falhas e como as inspeções atuam?</td></tr><tr><td>3 · Definir cenários</td><td>Quais parâmetros mudam entre os planos?</td></tr><tr><td>4 · Simular e repetir</td><td>Quais trajetórias podem ocorrer em cada plano?</td></tr><tr><td>5 · Estimar o risco</td><td>Qual a taxa e qual a precisão da estimativa?</td></tr><tr><td>6 · Sustentar a decisão</td><td>A conclusão resiste à incerteza e às hipóteses?</td></tr></table><aside class="notes">Este é o roteiro didático de aplicação organizado para a aula a partir dos dois casos; não apresentar como transcrição de uma formulação de seis etapas da dissertação. Retomar as seis perguntas ao transferir para outro problema.</aside></section>
+<section class="slide"><div class="kicker">Etapa 1 · Definir a decisão</div><h2>Comece pelo evento e pela exposição</h2><table><tr><th>Defina antes de executar</th><th>Disco</th><th>Estrutura</th></tr><tr><td>Evento contado</td><td>Falha do disco</td><td>Trinca atinge 100 mm</td></tr><tr><td>População</td><td>1.779 motores</td><td>1.000 aeronaves</td></tr><tr><td>Horizonte</td><td>20 anos</td><td>80.000 ciclos por aeronave</td></tr><tr><td>Exposição para a taxa</td><td>Horas de motor</td><td>Horas de voo da frota</td></tr></table><div class="ok">Escreva o que será contado e em qual unidade, antes de escolher uma distribuição.</div><aside class="notes">No disco, a saída primária é falha de disco. A taxa catastrófica requer uma conversão adicional. Na estrutura, o código usa a condição maior ou igual a 100 mm. O critério de 1e-9/h é o didático adotado no estudo, não um limite universal para qualquer evento.</aside></section>
+<section class="slide"><div class="kicker">Etapa 2 · Representar o sistema</div><h2>Quais entradas o novo cenário exige?</h2><table><tr><th>Grupo de entradas</th><th>O que informar</th></tr><tr><td>Operação</td><td>Tamanho e idade da frota; utilização; horizonte.</td></tr><tr><td>Falha ou degradação</td><td>Lei de vida ou de crescimento; parâmetros; condição de falha.</td></tr><tr><td>Inspeções</td><td>Primeira inspeção; intervalo; eficácia ou curva POD.</td></tr><tr><td>Intervenção</td><td>O que é renovado após falha ou detecção; limite de vida.</td></tr></table><div class="q">Para cada entrada: qual a fonte, qual a unidade e qual a incerteza?</div><aside class="notes">Distinguir parâmetros estimados com dados de valores adotados para explorar cenários. Não substituir automaticamente dados reais por distribuições uniformes só porque os exemplos as utilizam. Explicitar dependências entre utilização, crescimento e detecção quando forem relevantes.</aside></section>
+<section class="slide"><div class="kicker">Etapa 4 · Entender a repetição</div><h2>Uma réplica representa uma frota possível</h2><div class="grid3"><div class="card fab"><h3>Dentro da réplica</h3><p>Sortear condições e acompanhar cada item até o fim do horizonte.</p></div><div class="card op"><h3>Saída da réplica</h3><p>Contar falhas e registrar a exposição acumulada da frota.</p></div><div class="card acc"><h3>Entre réplicas</h3><p>Repetir com novos sorteios para estimar média e erro-padrão.</p></div></div><div class="formula">1 réplica ≠ 1 aeronave<br><span style="font-size:23px">1.000 réplicas = 1.000 histórias possíveis da frota</span></div><aside class="notes">A frota simulada e o número de réplicas são dimensões diferentes. No caso estrutural, uma réplica inclui 1.000 aeronaves. Aumentar réplicas melhora a precisão numérica; não aumenta a informação operacional usada para calibrar o modelo.</aside></section>
+<section class="slide"><div class="kicker">Caso 1 · Modelo do disco</div><h2>Quatro eventos comandam a trajetória</h2><table><tr><th>Próximo evento</th><th>O que o modelo faz</th></tr><tr><td>Falha do disco</td><td>Conta uma falha e substitui o disco.</td></tr><tr><td>Inspeção programada</td><td>Com a eficácia adotada, renova o processo de falha.</td></tr><tr><td>Inspeção por ITT</td><td>Aplica a mesma regra probabilística de eficácia.</td></tr><tr><td>Limite de vida</td><td>Substitui o disco sem contar falha.</td></tr></table><p class="note" style="margin-top:14px">Vida do disco: Weibull (β = 3,5; η = 85.000 h). Limite: 25.000 h. Inspeção ineficaz preserva o relógio de falha.</p><aside class="notes">No código fornecido, uma inspeção eficaz reinicia o relógio de falha, mas não reinicia o relógio do limite de vida. Falha e limite de vida reiniciam ambos. Após cada evento, os relógios de inspeção programada e ITT são atualizados conforme a especificação. Essa é uma hipótese a rever em aplicações futuras.</aside></section>
+<section class="slide"><div class="kicker">Caso 1 · Uma trajetória</div><h2>Como simular um motor</h2><ol><li>Partir da idade atual e sortear os tempos até os eventos.</li><li>Avançar até o evento que ocorrer primeiro.</li><li>Aplicar a regra: contar falha, renovar ou manter a condição.</li><li>Atualizar os relógios e continuar até o horizonte.</li><li>Somar as falhas de todos os motores da frota.</li></ol><div class="ok">Para um motor já em serviço, sortear a vida condicionada à idade já atingida.</div><aside class="notes">No notebook, as seções 5.1 e 5.3 detalham as regras. Use o gabarito como demonstração computacional. A escrita de uma implementação independente pode ser aprofundamento; o percurso principal da aula é aplicar o modelo e interpretar cenários.</aside></section>
+<section class="slide"><div class="kicker">Caso 2 · Modelo estrutural</div><h2>A trinca cresce; a inspeção pode detectá-la</h2><div class="formula">a(N) = a₀ e<sup>AN</sup></div><div class="grid2"><div class="card fab"><h3>Crescimento</h3><p>a₀: 0,1 a 1 mm.<br>A: 1,8 × 10⁻⁴ a 2,0 × 10⁻⁴ por ciclo.<br>Falha: a ≥ 100 mm.</p></div><div class="card op"><h3>Detecção</h3><p>A POD aumenta com a trinca.<br>Detectar permite renovar antes da falha; não detectar permite continuar o crescimento.</p></div></div><aside class="notes">a0 e A são sorteados uniformemente nos intervalos do exemplo. N mede os ciclos desde a condição inicial da peça ou desde a renovação, não o total de ciclos da aeronave. A curva POD fornecida tem beta 1,5, eta 10 mm e gama 1 mm; abaixo de gama a detecção é nula. Os parâmetros são ilustrativos.</aside></section>
+<section class="slide"><div class="kicker">Caso 2 · Uma trajetória</div><h2>Como simular inspeções e crescimento</h2><ol><li>Sortear a trinca inicial, o crescimento e a relação horas/ciclo.</li><li>Determinar a próxima oportunidade de inspeção.</li><li>Calcular se a trinca atinge o tamanho crítico antes dela.</li><li>Se não falhar, sortear a detecção segundo a POD.</li><li>Renovar após falha ou detecção e continuar até 80.000 ciclos.</li></ol><p class="note">A renovação reinicia a condição da peça; a aeronave continua acumulando ciclos. Sem falha ou detecção, a trinca continua crescendo.</p><aside class="notes">A execução reproduz as regras do script estrutural, incluindo a antecipação aleatória de até 1.000 ciclos na inspeção. O código controla separadamente ciclos acumulados da aeronave e ciclos associados à evolução da peça. Não reescrever o relógio como simples incremento sem conferir essa distinção.</aside></section>
+<section class="slide"><div class="kicker">Etapa 3 · Definir cenários</div><h2>Mude o plano, preserve a comparação</h2><table><tr><th>Caso</th><th>Plano base</th><th>Plano alternativo</th></tr><tr><td>Disco</td><td>Intervalo: 6.000 h<br>Eficácia: 75%</td><td>Intervalo: 3.000 h<br>Eficácia: 95%</td></tr><tr><td>Estrutura</td><td>Primeira inspeção: 15.000 ciclos<br>Intervalo: 7.500 ciclos</td><td>Primeira inspeção: 10.000 ciclos<br>Intervalo: 5.000 ciclos</td></tr></table><div class="q">Mantenha a mesma frota, horizonte, lei de falha e definição da taxa. Declare cada mudança.</div><aside class="notes">As sementes podem ser distintas entre cenários, desde que registradas. Mesma semente em códigos com diferentes sequências de chamadas não garante pareamento de trajetórias. Métodos com números aleatórios comuns exigem implementação deliberada e não são necessários para esta aula.</aside></section>
+<section class="slide"><div class="kicker">Etapa 4 · Executar os modelos</div><h2>Use as funções prontas do notebook</h2><div class="grid2"><div class="card fab"><h3>Disco · seção 5.3</h3><p><code>f = repetir(6000, 0.75,<br>200, 2026)</code></p><p>Saída: falhas da frota em cada réplica.</p></div><div class="card op"><h3>Estrutura · seção 7.1</h3><p><code>f, h = repetir_estrutura(<br>15000, 7500, 300, 2026)</code></p><p>Saídas: falhas e horas por réplica.</p></div></div><p class="note" style="margin-top:16px">Os dois últimos argumentos são número de réplicas e semente. Execute antes as células que definem as funções.</p><div class="ok">Demonstração em R: 1.000 réplicas por cenário. A referência original usa 10.000.</div><aside class="notes">Os trechos são chamadas reais às funções presentes no gabarito. No notebook de exercícios, a tradução vetorizada está pronta; as funções dos exercícios 4 e 5 exigem preenchimento. Para demonstrar sem interrupções, use o gabarito. A tarefa possui notebook autônomo e usa 10.000 réplicas em Python.</aside></section>
+<section class="slide"><div class="kicker">Etapa 5 · Transformar falhas em risco</div><h2>Cada taxa precisa de uma definição</h2><table><tr><th>Saída desejada</th><th>Cálculo no modelo</th></tr><tr><td>Disco · taxa de falha</td><td>Falhas médias ÷ horas de motor da frota.</td></tr><tr><td>Disco · taxa catastrófica</td><td>Taxa de falha × 2 motores × p, com p = 0,1 no cenário.</td></tr><tr><td>Estrutura · taxa por hora</td><td>Falhas estruturais ÷ horas de voo da frota.</td></tr></table><p style="margin-top:16px">No disco: 1.779 × 3.600 × 20 = <b>128.088.000 horas de motor</b>.</p><div class="q">O evento da taxa deve ser o mesmo evento ao qual o critério se refere.</div><aside class="notes">Os fatores 2 e p expressam a conversão adotada no estudo; não são universais. Para a estrutura, o Python usa exposição nominal: soma de 80.000 ciclos vezes horas/ciclo de cada aeronave. O R original tem uma diferença de aproximadamente 1% no denominador, já documentada no notebook; não dedicar a aula à reciclagem de matrizes. A tarefa calcula a média das taxas por réplica; a apresentação do R usa razão entre médias. Explicitar o estimador ao comparar números.</aside></section>
+<section class="slide"><div class="kicker">Verificação necessária para aplicar</div><h2>Confira as horas antes de interpretar a taxa</h2><div class="grid2"><div class="card fab"><h3>Exposição correta</h3><p>2 falhas em 1.000.000 h</p><div class="formula" style="font-size:30px">2 × 10⁻⁶ falhas/h</div></div><div class="card op"><h3>Metade das horas contada</h3><p>2 falhas em 500.000 h</p><div class="formula" style="font-size:30px">4 × 10⁻⁶ falhas/h</div></div></div><div class="ok">A taxa dobrou sem ocorrer nenhuma falha adicional. Verifique evento, exposição e unidade.</div><aside class="notes">Exemplo apenas aritmético, independente dos valores dos dois casos. Antes de usar o método em uma nova frota, conferir a exposição efetivamente representada: utilização, horizonte, retirada de serviço e períodos sem operação. A exposição nominal pressupõe o horizonte indicado no modelo.</aside></section>
+<section class="slide"><div class="kicker">Etapa 5 · Quantificar a precisão</div><h2>Quantas réplicas são suficientes?</h2><div class="formula">EP = s / √n <br><span style="font-size:23px">n: número de réplicas · s: desvio-padrão das réplicas</span></div><div class="grid2"><div class="card fab"><h3>Para explorar em aula</h3><p>1.000 réplicas R por cenário.<br>Execução rápida para entender o efeito dos planos.</p></div><div class="card op"><h3>Para refinar o resultado</h3><p>10.000 réplicas reduzem o EP por um fator de aproximadamente 3,16.</p></div></div><div class="q">Reporte média, EP e n. Se a precisão não separa o resultado do critério, aumente n.</div><aside class="notes">O número de réplicas depende da precisão necessária para a decisão. Não há n universalmente suficiente. Em eventos raros, avaliar também EP/média; zero falhas observadas não demonstra risco nulo. A faixa média ± 2 EP é uma aproximação de Monte Carlo, não uma incerteza completa do modelo.</aside></section>
+<section class="slide"><div class="kicker">Etapa 6 · Comparar com o critério</div><h2>O plano muda a conclusão sobre o risco?</h2><table><tr><th>Evento avaliado</th><th>Plano base (/h)</th><th>Plano alternativo (/h)</th></tr><tr><td>Disco · evento catastrófico</td><td>1,048 × 10⁻⁸</td><td>7,78 × 10⁻¹⁰</td></tr><tr><td>Estrutura · falha estrutural</td><td>4,434 × 10⁻⁸</td><td>3,982 × 10⁻¹⁰</td></tr></table><p class="note" style="margin-top:12px">Referências R com 10.000 réplicas. No estudo, compara-se com 1 × 10⁻⁹ /h; confirme a adequação do critério ao evento em uma nova aplicação.</p><div class="q">A média abaixo do critério é um indício. Considere também o EP e as hipóteses antes de recomendar.</div><aside class="notes">Estes números são os de referência e não as saídas rápidas de 1.000 réplicas. A apresentação não demonstra conformidade regulatória. Na tarefa, a faixa de dois EP inteiramente abaixo, acima ou incluindo o critério define a interpretação didática. As taxas estruturais nominais no Python diferem ligeiramente das do R.</aside></section>
+<section class="slide"><div class="kicker">Etapa 6 · Testar uma hipótese</div>
+<h2>Sensibilidade à fração catastrófica p</h2>
+<div style="display:flex;gap:30px;align-items:center">
+<svg viewBox="0 0 720 330" width="720" height="330" style="overflow:visible">
+<g font-size="14" fill="#52514e" font-family="Segoe UI,Arial">
+<line x1="80" y1="280" x2="700" y2="280" stroke="#8a8984"/>
+<line x1="80" y1="20" x2="80" y2="280" stroke="#8a8984"/>
+<text x="72" y="285.0" text-anchor="end">1e-10</text><line x1="80" x2="700" y1="280.0" y2="280.0" stroke="#eeede9"/><text x="72" y="155.0" text-anchor="end">1e-9</text><line x1="80" x2="700" y1="150.0" y2="150.0" stroke="#eeede9"/><text x="72" y="25.0" text-anchor="end">1e-8</text><line x1="80" x2="700" y1="20.0" y2="20.0" stroke="#eeede9"/>
+<text x="80.0" y="302" text-anchor="middle">0</text><text x="204.0" y="302" text-anchor="middle">0,1</text><text x="328.0" y="302" text-anchor="middle">0,2</text><text x="452.0" y="302" text-anchor="middle">0,3</text><text x="576.0" y="302" text-anchor="middle">0,4</text><text x="700.0" y="302" text-anchor="middle">0,5</text>
+<text x="390.0" y="324" text-anchor="middle">p = P(catástrofe | falha do disco)</text>
+</g>
+<line x1="80" x2="700" y1="150.0" y2="150.0" stroke="#eb6834" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="700" y="142.0" text-anchor="end" font-size="15" fill="#0b0b0b">critério 1 × 10⁻⁹</text>
+<line x1="204.0" x2="204.0" y1="20" y2="280" stroke="#52514e" stroke-dasharray="2 4"/>
+<text x="210.0" y="34" font-size="15" fill="#0b0b0b">p adotado = 0,10</text>
+<line x1="239.5" x2="239.5" y1="150.0" y2="280" stroke="#52514e" stroke-dasharray="2 4"/>
+<text x="245.5" y="270" font-size="15" fill="#0b0b0b">p ≈ 0,13</text>
+<polyline points="104.8,255.1 109.8,244.8 114.7,236.1 119.7,228.5 124.6,221.9 129.6,215.9 134.6,210.6 139.5,205.6 144.5,201.1 149.4,196.9 154.4,193.0 159.4,189.4 164.3,186.0 169.3,182.7 174.2,179.7 179.2,176.8 184.2,174.0 189.1,171.4 194.1,168.9 199.0,166.5 204.0,164.2 209.0,162.0 213.9,159.9 218.9,157.8 223.8,155.8 228.8,153.9 233.8,152.1 238.7,150.3 243.7,148.5 248.6,146.8 253.6,145.2 258.6,143.6 263.5,142.1 268.5,140.6 273.4,139.1 278.4,137.7 283.4,136.3 288.3,134.9 293.3,133.6 298.2,132.3 303.2,131.0 308.2,129.8 313.1,128.6 318.1,127.4 323.0,126.2 328.0,125.1 333.0,124.0 337.9,122.9 342.9,121.8 347.8,120.7 352.8,119.7 357.8,118.7 362.7,117.7 367.7,116.7 372.6,115.7 377.6,114.8 382.6,113.8 387.5,112.9 392.5,112.0 397.4,111.1 402.4,110.3 407.4,109.4 412.3,108.5 417.3,107.7 422.2,106.9 427.2,106.1 432.2,105.3 437.1,104.5 442.1,103.7 447.0,102.9 452.0,102.2 457.0,101.4 461.9,100.7 466.9,100.0 471.8,99.2 476.8,98.5 481.8,97.8 486.7,97.1 491.7,96.5 496.6,95.8 501.6,95.1 506.6,94.4 511.5,93.8 516.5,93.2 521.4,92.5 526.4,91.9 531.4,91.3 536.3,90.6 541.3,90.0 546.2,89.4 551.2,88.8 556.2,88.2 561.1,87.7 566.1,87.1 571.0,86.5 576.0,85.9 581.0,85.4 585.9,84.8 590.9,84.3 595.8,83.7 600.8,83.2 605.8,82.6 610.7,82.1 615.7,81.6 620.6,81.1 625.6,80.6 630.6,80.0 635.5,79.5 640.5,79.0 645.4,78.5 650.4,78.0 655.4,77.6 660.3,77.1 665.3,76.6 670.2,76.1 675.2,75.6 680.2,75.2 685.1,74.7 690.1,74.2 695.0,73.8 700.0,73.3" fill="none" stroke="#2a78d6" stroke-width="2.5"/>
+<circle cx="204.0" cy="164.2" r="6" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2" data-tip="p = 0,10 → 7,78 × 10⁻¹⁰ /h"/>
+<circle cx="239.5" cy="150.0" r="6" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2" data-tip="p ≈ 0,129 → 1 × 10⁻⁹ /h"/>
+</svg>
+<div style="flex:1"><p>Taxa catastrófica do plano mitigado em função de <i>p</i>.</p><p>Com a taxa de referência, fica abaixo do critério se <b>p &lt; 0,129</b>.</p><p class="note">Demais parâmetros fixos. O gráfico varia p algebricamente; não estima p com dados nem inclui a incerteza de Monte Carlo.</p></div>
+</div></section>
+<section class="slide"><div class="kicker">Etapa 6 · Separar mudanças no plano</div>
+<h2>Fatorial 2 × 2: qual mudança reduz as falhas?</h2>
+<p class="note" style="margin-bottom:6px">Falhas médias na frota de 1.779 motores em 20 anos</p>
+<div class="vbars" style="height:300px"><div class="col"><div class="val">6,78</div><div class="b" style="height:90.4%;position:relative" data-tip="6.000 h · 75%: 6,78 ± 0,16 falhas (EP)"><div style="position:absolute;left:50%;top:-2.4%;height:4.7%;width:2px;background:var(--ink);transform:translateX(-1px)"></div></div></div><div class="col"><div class="val">2,32</div><div class="b" style="height:30.9%;position:relative" data-tip="6.000 h · 95%: 2,32 ± 0,11 falhas (EP)"><div style="position:absolute;left:50%;top:-4.7%;height:9.5%;width:2px;background:var(--ink);transform:translateX(-1px)"></div></div></div><div class="col"><div class="val">1,58</div><div class="b" style="height:21.1%;position:relative" data-tip="3.000 h · 75%: 1,58 ± 0,09 falhas (EP)"><div style="position:absolute;left:50%;top:-5.7%;height:11.4%;width:2px;background:var(--ink);transform:translateX(-1px)"></div></div></div><div class="col"><div class="val">0,49</div><div class="b" style="height:6.5%;position:relative" data-tip="3.000 h · 95%: 0,49 ± 0,05 falhas (EP)"><div style="position:absolute;left:50%;top:-10.2%;height:20.4%;width:2px;background:var(--ink);transform:translateX(-1px)"></div></div></div></div>
+<div class="vlabels"><div>6.000 h<br><small>eficácia 75%</small></div><div>6.000 h<br><small>eficácia 95%</small></div><div>3.000 h<br><small>eficácia 75%</small></div><div>3.000 h<br><small>eficácia 95%</small></div></div>
+<p class="note" style="margin-top:10px">Experimento didático adicional · falhas em 20 anos · 200 réplicas por combinação · barras: ± 1 EP. Registre as sementes ao refazer.</p></section>
+<section class="slide"><div class="kicker">Etapa 6 · Interpretar o experimento</div><h2>Qual mudança vale investigar?</h2><div class="grid3"><div class="card fab"><h3>Só o intervalo</h3><p>6,78 → <b>1,58</b> falhas.</p></div><div class="card op"><h3>Só a eficácia</h3><p>6,78 → <b>2,32</b> falhas.</p></div><div class="card acc"><h3>As duas mudanças</h3><p>6,78 → <b>0,49</b> falhas.</p></div></div><p style="margin-top:18px">Nesses cenários, reduzir o intervalo teve maior efeito médio. A escolha operacional também depende do custo e da viabilidade das inspeções.</p><div class="q">Teste separadamente o que muda o plano e o que muda sua confiança no modelo.</div><aside class="notes">Valores do fatorial do slide anterior, 200 réplicas por combinação. A conclusão vale para os níveis testados. Não extrapolar para outros intervalos ou assumir que os efeitos se multiplicam em geral. Distinguir variável de decisão, como intervalo, de parâmetro incerto, como POD ou crescimento.</aside></section>
+<section class="slide"><div class="kicker">Antes de usar em uma frota real</div><h2>Quais dados sustentam as entradas?</h2><table><tr><th>Entrada ou resultado</th><th>Dados de serviço ou ensaio</th></tr><tr><td>Vida até falha</td><td>Idades, falhas confirmadas e exposição dos sobreviventes.</td></tr><tr><td>Crescimento da trinca</td><td>Medições de tamanho associadas aos ciclos e condições de uso.</td></tr><tr><td>POD ou eficácia</td><td>Resultados de inspeção com condição real conhecida.</td></tr><tr><td>Previsão de risco</td><td>Eventos e exposição de um período ou conjunto independente.</td></tr></table><div class="ok">Estime entradas com dados adequados e confronte as previsões com dados independentes.</div><aside class="notes">Os casos têm parâmetros ilustrativos. Registros de remoção não equivalem necessariamente a falhas confirmadas; considerar NFF e censura. Mais réplicas reduzem erro numérico, mas não corrigem uma lei de falha inadequada ou uma POD incorreta.</aside></section>
+<section class="slide"><div class="kicker">Limitação do estudo · orientação para aplicações futuras</div>
+<h2>Dos pressupostos às regras de engenharia</h2>
+<p>No estudo de Igor, alguns valores foram assumidos como <b>pressupostos de engenharia</b>, sem justificativa clara para a escolha. Isso limita a sustentação dos resultados e sua transferência para componentes reais.</p>
+<table><tr><th>Regras a desenvolver</th><th>O que precisam orientar</th></tr>
+<tr><td>Evidência para cada parâmetro</td><td>Quais dados, ensaios ou referências sustentam o valor.</td></tr>
+<tr><td>Faixas admissíveis</td><td>Quais valores e distribuições são justificáveis para cada componente, mecanismo e condição de operação.</td></tr>
+<tr><td>Tratamento da incerteza</td><td>Como escolher cenários e testar a decisão quando a evidência é insuficiente.</td></tr></table>
+<div class="ok">Aplicações futuras precisam de regras escritas para escolher e justificar as entradas. Uma faixa plausível não garante risco aceitável.</div>
+<aside class="notes">Reconhecer a contribuição metodológica e a limitação apontada: parte dos valores de entrada foi adotada como pressuposto de engenharia sem fundamentação explícita suficiente. As faixas do exemplo não devem virar limites universais para componentes reais. Propor regras documentadas por família de componentes, mecanismo de falha e ambiente operacional, com origem da evidência, domínio de validade, faixas e distribuições justificadas, tratamento de extrapolação e revisão quando surgirem novos dados. Na falta de dados, explicitar a incerteza e testar cenários plausíveis; não apresentar a escolha de um valor como validação. O desenvolvimento dessas regras é uma necessidade para futuras aplicações, não uma entrega adicional exigida aos alunos nesta tarefa.</aside></section>
+<section class="slide"><div class="kicker">Transferir para um cenário futuro</div><h2>Como adaptar o caso estrutural</h2><ol><li>Definir a nova frota, o evento crítico e o horizonte.</li><li>Verificar se a lei de crescimento representa o mecanismo.</li><li>Estimar trinca inicial, crescimento, utilização e POD.</li><li>Definir o plano atual e as alternativas de inspeção.</li><li>Simular, comparar taxas e testar os parâmetros incertos.</li></ol><div class="q">Se o mecanismo ou a intervenção mudar, reveja as regras do modelo antes de trocar apenas os números.</div><aside class="notes">Exemplo de transferência: outra região estrutural ou outra condição de utilização. Não supor que a lei exponencial e os mesmos intervalos de parâmetros se aplicam automaticamente. Verificar dependências, condição de renovação, disponibilidade das inspeções e adequação do evento e do critério.</aside></section>
+<section class="slide"><div class="kicker">Prática em sala · aplicar o roteiro</div><h2>Proponha uma alternativa de inspeção</h2><p>No caso estrutural, use o plano base e escolha uma alternativa de primeira inspeção e intervalo.</p><ol><li>Declare os parâmetros e a razão da mudança.</li><li>Execute ambos com <b>300 réplicas</b> e sementes registradas.</li><li>Apresente falhas médias, taxa por hora e EP da taxa.</li><li>Explique se a alternativa reduz o risco e qual a limitação da conclusão.</li></ol><p class="note">Use <code>repetir_estrutura</code>, na seção 7.1. Compare o mesmo estimador e o mesmo denominador nos dois planos.</p><aside class="notes">Atividade guiada com as funções prontas, substituindo a reimplementação como núcleo da prática presencial. O professor pode executar as alternativas propostas no gabarito. Para a taxa, usar falhas/horas por réplica, média e std(ddof=1)/sqrt(n). Com 300 réplicas, eventos raros podem ser pouco precisos; isso faz parte da interpretação, não autoriza declarar risco nulo.</aside></section>
+<section class="slide"><div class="kicker">Tarefa individual</div>
+<h2>Aplique o método ao caso estrutural</h2>
+<div class="grid2"><div class="card fab"><h3>Comparar planos</h3><p>Use o código Python fornecido nos planos estruturais base e revisto. Apresente falhas, taxas e erros-padrão numa tabela, com sementes e número de réplicas.</p></div><div class="card op"><h3>Testar e interpretar</h3><p>Aumente o crescimento da trinca em 20% no plano revisto. Discuta a decisão, a exposição e os dados para validação. Entregue apenas o notebook executado.</p></div></div>
+<p style="margin-top:18px">Comparação 40% · sensibilidade 35% · interpretação 25%.</p>
+<p class="note">Entrega individual por e-mail: <b>25/11/2026</b> · Enunciado completo: <code>../enviar_alunos/tarefa_safety.md</code>.</p></section>
+<section class="slide"><div class="kicker">O roteiro para levar</div><h2>Do cenário à decisão</h2><div class="formula" style="font-size:29px">Definir o evento → representar o sistema → propor planos<br>→ simular → quantificar risco e precisão → testar a conclusão</div><p>Uma aplicação defensável registra entradas, hipóteses, exposição, sementes e limites de uso.</p><p class="note" style="margin-top:18px">Estudo de referência: Igor Neves Marques da Silva, <i>Monte Carlo Simulation Application on Aviation Safety Risk Assessment</i>, dissertação de mestrado, ITA, 2026.</p><div class="ok">Mais réplicas melhoram a precisão. Dados e um modelo adequado sustentam a aplicação.</div><aside class="notes">Fechar pedindo que um aluno descreva o que precisaria mudar para aplicar o método a outro cenário. Material complementar sobre verificação e validação: Oberkampf e Roy (2010); sobre reprodutibilidade: National Academies (2019). O foco do percurso presencial é o uso do método para comparar programas de inspeção.</aside></section>
+<div class="footer"><span>TE-292 · Monte Carlo aplicado à decisão de inspeção</span><span id="pg"></span></div>
+</div>
+<div id="notes"></div>
+<div id="tip"></div>
+<script>
+(function(){
+  var stage=document.getElementById('stage'),slides=[].slice.call(document.querySelectorAll('.slide')),
+      pg=document.getElementById('pg'),notes=document.getElementById('notes'),prog=document.getElementById('progress'),tip=document.getElementById('tip'),i=0;
+  function fit(){var s=Math.min(innerWidth/1280,innerHeight/720)*.98;stage.style.transform='translate(-50%,-50%) scale('+s+')';}
+  function frags(){return [].slice.call(slides[i].querySelectorAll('.frag'));}
+  function show(n,end){
+    slides[i].classList.remove('active');i=Math.max(0,Math.min(slides.length-1,n));
+    slides[i].classList.add('active');
+    frags().forEach(function(f){f.classList.toggle('on',!!end);});
+    pg.textContent=(i+1)+' / '+slides.length;prog.style.width=((i+1)/slides.length*100)+'%';
+    var a=slides[i].querySelector('aside.notes');notes.textContent=a?a.textContent:'(sem notas)';
+    history.replaceState(null,'','#'+(i+1));
+  }
+  function next(){var f=frags().filter(function(x){return !x.classList.contains('on');});if(f.length)f[0].classList.add('on');else if(i<slides.length-1)show(i+1);}
+  function prev(){var f=frags().filter(function(x){return x.classList.contains('on');});if(f.length)f[f.length-1].classList.remove('on');else if(i>0)show(i-1,true);}
+  addEventListener('keydown',function(e){
+    if(['ArrowRight','PageDown',' ','Enter'].indexOf(e.key)>=0){e.preventDefault();next();}
+    else if(['ArrowLeft','PageUp','Backspace'].indexOf(e.key)>=0){e.preventDefault();prev();}
+    else if(e.key==='Home')show(0);else if(e.key==='End')show(slides.length-1,true);
+    else if(e.key==='n'||e.key==='N')document.body.classList.toggle('shownotes');
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  });
+  stage.addEventListener('click',function(e){if(e.target.closest('[data-tip]'))return;(e.clientX>innerWidth/3?next:prev)();});
+  document.addEventListener('mousemove',function(e){var t=e.target.closest&&e.target.closest('[data-tip]');
+    if(t){tip.textContent=t.getAttribute('data-tip');tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+14)+'px';}else tip.style.display='none';});
+  addEventListener('resize',fit);fit();
+  var h=parseInt(location.hash.slice(1),10);show(isNaN(h)?0:h-1);
+})();
+</script>
+</body>
+</html>
